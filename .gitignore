@@ -1,0 +1,10 @@
+node_modules/
+*.log
+test-output/
+*.badge.json
+Backups/
+output/
+.env
+.env.*
+*.zip
+*.tgz

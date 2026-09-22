@@ -1,0 +1,26 @@
+.import-settings{height:46px}
+.uploadbar{display:flex;align-items:center;gap:9px;padding:0 18px 12px;flex-shrink:0;flex-wrap:wrap}
+.uploadbar span{font-size:10px;color:var(--muted);flex:1;min-width:160px}
+#saveRecovery{position:fixed;bottom:12px;left:12px;right:12px;z-index:7;padding:12px;background:#fff2d5;border:1px solid #b98722;border-radius:8px;box-shadow:0 3px 15px #0002;font-size:12px}
+@media(min-width:761px){.app{height:calc(100vh - 118px);min-height:0}.toolbox,.inspector{height:100%;overflow:auto}body{height:100vh;overflow:hidden}.workbar{padding:14px 18px}.stage{min-height:160px}.viewbar{flex-wrap:wrap}}
+@media(max-width:760px){.import-settings{height:auto}.app{min-height:640px}}
+.library-entry{border:1px solid var(--line);padding:12px;border-radius:8px;margin:10px 0}
+.library-entry strong{overflow-wrap:anywhere}
+.library-entry .row{flex-wrap:wrap}
+#auditResults{white-space:pre-wrap;max-height:50vh;overflow:auto;font-size:12px;line-height:1.7}
+#exportQuantityControls{border:1px solid var(--line);border-radius:8px;padding:12px;margin:14px 0}
+#exportQuantityControls legend{font-weight:600}
+#exportQuantityControls:disabled{opacity:.5}
+#exportQuantities{max-height:240px;overflow:auto}
+.quantity-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-top:1px solid var(--line)}
+.quantity-row label{flex:1;min-width:0;overflow-wrap:anywhere}
+.quantity-row small,.quantity-row [data-capacity]{display:block;color:var(--muted);font-size:10px;margin:5px 0}
+.quantity-row input{max-width:110px;display:block}
+#sheetPreview svg{display:block;max-height:230px;width:100%;margin:10px auto}
+/* Flex layout must not override the hidden state of export navigation. */
+#sheetNavigation[hidden]{display:none}
+/* Shared home navigation stays outside artwork and print exports. */
+.studio-returnbar{height:40px;padding:10px 20px;background:#29143f;box-sizing:border-box}
+.studio-returnbar a{color:#ffe4a0}
+body.busy .studio-returnbar{pointer-events:none;opacity:.7}
+@media(min-width:761px){body:has(.studio-returnbar) .app{height:calc(100vh - 158px)}}

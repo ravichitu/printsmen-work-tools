@@ -1,0 +1,25 @@
+/* Interface only: print canvases and exported artwork keep their own colours. */
+body { background:#211035; color:#f7edcf; }
+.frame { background:#2b1644; border-color:#ad8741; }
+header.masthead,.home-stage { background:linear-gradient(125deg,#29113f,#472266); }
+.tab,.home-card,.page { --ui-accent:#edcd77 !important; --ui-tint:#42245e !important; }
+.home-card { background:#38204e; border-color:#876b40; }
+.home-card-title { color:#ffe4a0; }
+.home-card-desc { color:#f0e5cf; }
+.page aside.controls,#page13 aside.controls { background:#29183e; }
+.page .section,#page13 .section { background:#352049; border-color:#806645; }
+.page .controls input:not([type=range]):not([type=color]):not([type=checkbox]):not([type=radio]),.page .controls select,.page .controls textarea { background:#21132f !important; color:#fff4db !important; border-color:#a28a5d !important; }
+.page .export-btn,#page13 .export-btn { background:linear-gradient(110deg,#dfb955,#ffe4a0); color:#29143f; }
+.page .pill,#page13 .pill { background:#402655; color:#fff0c9; border-color:#947647; }
+.page .pill.active,#page13 .pill.active { background:#edcd77; color:#29143f; }
+.studio-menu { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:14px 24px; background:#29143f; border-bottom:1px solid #947647; }
+.studio-menu button,.studio-menu summary { font:600 16px/1.5 Inter,sans-serif; color:#ffe4a0; background:#42245e; border:1px solid #947647; border-radius:7px; padding:9px 16px; cursor:pointer; }
+.studio-menu details { position:relative; }
+.studio-tool-list { position:absolute; top:100%; left:0; width:min(340px,80vw); max-height:65vh; overflow:auto; z-index:500; background:#29143f; border:1px solid #947647; padding:10px; box-shadow:0 12px 28px #0008; }
+.studio-tool-list button { display:block; width:100%; margin:4px 0; text-align:left; }
+body.studio-navigation-ready .tab-bar { display:none !important; }
+.studio-dialog { width:min(560px,90vw); background:#29143f; color:#fff0d0; border:1px solid #edcd77; border-radius:12px; padding:28px; font:16px/1.65 Inter,sans-serif; }
+.studio-dialog::backdrop { background:#0009; }
+.studio-dialog button { padding:10px 20px; background:#edcd77; color:#29143f; border:0; border-radius:6px; font-size:16px; }
+.studio-status { position:fixed; right:18px; bottom:18px; max-width:min(460px,90vw); padding:12px 18px; background:#29143f; color:#ffe4a0; border:1px solid #edcd77; border-radius:8px; z-index:10000; font-size:15px; }
+input[aria-invalid=true] { outline:2px solid #fb7185 !important; }
