@@ -1,0 +1,5 @@
+private/
+*.log
+*.zip
+*.licence.json
+*.activation.json

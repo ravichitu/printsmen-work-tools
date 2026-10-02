@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PrintsMen Update Manager</title><link rel="stylesheet" href="updates.css"></head>
+<body><nav><a href="index.html">Studio Home</a><a href="dashboard.html">Application Dashboard</a><strong>PRINTSMEN</strong></nav><main>
+<p class="eyebrow">APPLICATION MAINTENANCE</p><h1>Update Manager</h1>
+<p>Automatic checks. Verified downloads. Installation when your studio is idle.</p>
+<section><span class="tag" id="phase">Connecting...</span><h2 id="version">Installed version</h2><p id="message" role="status" aria-live="polite">Reading update settings...</p><p id="checked" class="muted"></p></section>
+<section><h2>Automatic installation</h2><p>Checks every six hours while the studio runs. A signed release downloads automatically, then installs after all design-editor tabs are closed and five minutes without activity.</p><p id="idleStatus" class="muted"></p><p class="muted">Suspended or unresponsive tabs block automatic installation. Keep the computer on during an update. Source/development folders are never automatically overwritten.</p></section>
+<section id="release" hidden><h2 id="releaseTitle"></h2><p id="notes"></p><p id="size" class="muted"></p></section>
+<div class="actions"><button id="check">Check now</button><button id="download" hidden>Download verified update</button><button id="install" hidden>Install now</button></div>
+<dialog id="confirmInstall"><h2>Save your work first</h2><p>Export or save every open job and close your design tabs before continuing. This stops and restarts the studio. It does not uninstall or create a new installation identity.</p><label><input type="checkbox" id="savedWork">I saved my work and closed the design tabs.</label><div class="actions"><button id="cancel">Cancel</button><button id="confirm" disabled>Install update</button></div></dialog>
+<p class="footnote">Only releases signed by the owner's update key are accepted. Activation hosting and release hosting are separate. If no trusted feed is configured, nothing is downloaded or installed.</p>
+</main><script src="updates.js" defer></script></body></html>

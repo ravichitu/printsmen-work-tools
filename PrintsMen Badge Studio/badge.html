@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PrintsMen | Customised Studio</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="editor.css"><link rel="stylesheet" href="badge-theme.css"></head>
+<body class="catalogue-mode">
+<nav class="studio-returnbar" aria-label="Studio navigation"><a href="index.html">Studio Home</a><button id="showCatalogue" type="button" hidden>Back to catalogues</button></nav>
+<noscript>This editor needs JavaScript enabled.</noscript>
+<section id="badgeStartup" class="badge-startup" role="status" aria-live="polite">
+  <strong id="badgeStartupTitle">Loading Customised Designer...</strong>
+  <p id="badgeStartupMessage">Preparing your product catalogues.</p>
+  <div id="badgeLaunchHelp" hidden><p>Double-click <strong>Start Customised Studio.cmd</strong> in this folder, then choose Customised Designer after signing in. The earlier Start Badge Studio.cmd launcher still works. Do not open badge.html directly.</p><div class="badge-launch-links"><a href="http://127.0.0.1:4178/login.html">Open local studio</a><a href="http://127.0.0.1:4188/login.html">Open installed preview</a></div></div>
+  <button id="badgeRetry" type="button" hidden>Retry loading</button>
+</section>
+<main id="catalogueHome" class="catalogue-home" aria-labelledby="catalogueTitle" aria-busy="true" inert>
+  <div class="catalogue-hero"><div><span class="catalogue-eyebrow">PRINTSMEN / CUSTOMISED DESIGNER</span><h1 id="catalogueTitle" tabindex="-1">What would you like to create?</h1><p>Choose a product and size to open your design workspace.</p><a href="products.html">Boxes, danglers and 3D mockups</a></div><div class="catalogue-home-actions"><button id="catalogueLibrary" type="button">My saved designs</button><button id="catalogueOpen" type="button">Open project file</button></div></div>
+  <div id="catalogueResume" class="catalogue-resume" hidden><p id="catalogueWorkspaceStatus" role="status">Loading local designs...</p><button id="resumeWorkspace" type="button" hidden>Resume design</button></div>
+  <nav id="catalogueFilters" class="catalogue-filters" aria-label="Product categories" hidden><button id="allCatalogues" type="button">&larr; All catalogues</button></nav>
+  <div id="catalogueCategories" class="catalogue-grid catalogue-category-grid"></div>
+  <div id="catalogueGroups" hidden></div>
+  <section id="catalogueCustom" class="catalogue-custom" hidden><div><h2>Custom size</h2><p>Set your own round or rectangular dimensions, face size and safe zone in millimetres.</p></div><button type="button" data-start-preset="custom">Create custom size</button></section>
+  <p id="catalogueFootnote" class="catalogue-footnote" hidden>Measurements are in millimetres. Confirm machine fit with a physical proof before production.</p>
+</main>
+<div id="editorWorkspace" hidden>
+<header><div class="brand"><span class="brand-mark">P<span>m</span></span><div>PRINTSMEN<small>CUSTOMISED STUDIO</small></div></div><input id="projectName" aria-label="Project name" value="Untitled badges"><span id="saveStatus">Local workspace</span><button id="openProject">Open</button><button id="saveProject">Save Project</button><button id="export" class="primary">Export / Print</button></header>
+<div class="import-settings"><button id="newProject">New project</button><button data-action="library">My designs</button><button data-action="audit">Check all pages</button><label>Import placement <select id="importPlacement"><option value="current">Add files to current badge</option><option value="pages">One new badge page per image / PDF page</option></select></label><span>Local edition. RGB inkjet output. No cloud uploads or paid services.</span></div>
+<div class="app">
+<aside class="toolbox"><div class="eyebrow">CREATE</div><button data-add="text"><b>T</b>Text</button><button data-add="curve"><b>T&#8978;</b>Curved text</button><button id="importImage"><b>&#9635;</b>Image / SVG</button><button id="importPdf"><b>PDF</b>PDF pages</button><button data-add="qr"><b>&#9638;</b>QR code</button><button data-add="barcode"><b>|||</b>Barcode</button><button data-panel="shapes"><b>&#9671;</b>Shapes</button><hr><button data-panel="badge"><b>&#9711;</b>Badge size</button><button data-panel="layers"><b>&#9776;</b>Layers</button><button data-panel="batch"><b>CSV</b>Bulk data</button><button data-panel="templates"><b>&#9638;</b>Templates</button><button data-panel="help"><b>?</b>Guide</button><div class="local-note">PRIVATE BY DESIGN<br>Files stay on this device.</div></aside>
+<main><div class="workbar"><div><span class="eyebrow">DESIGN WORKSPACE</span><h1 id="badgeTitle">Round badge 58 mm</h1></div><div class="history"><button id="undo" title="Undo (Ctrl+Z)">Undo</button><button id="redo" title="Redo (Ctrl+Y)">Redo</button><button id="duplicateObject" title="Duplicate selected">Duplicate</button><button id="deleteObject" title="Delete selected">Delete</button></div></div>
+<div class="uploadbar"><button id="uploadImages" class="primary">Upload images</button><button id="uploadPdf">Upload PDF</button><span>PNG, JPG, WebP, SVG | Select multiple files or drop them on the canvas.</span></div>
+<div class="viewbar"><label><input type="checkbox" id="showGuides" checked>Guides</label><label><input type="checkbox" id="showGrid">10 mm grid</label><label><input type="checkbox" id="showTop" checked>Top</label><button id="selectTool" class="active">Select</button><button id="panTool">Pan</button><button id="fitView">Fit view</button><input id="zoom" type="range" min="30" max="250" value="100" aria-label="Canvas zoom"><span id="zoomLabel">100%</span></div>
+<div class="stage" id="stage"><div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div></div>
+<div class="legend"><span><i class="safe"></i>Safe zone <strong id="safeInfo"></strong></span><span><i class="face"></i>Face / bleed line <strong id="faceInfo"></strong></span><span><i class="cut"></i>Cut size <strong id="cutInfo"></strong></span></div>
+<div class="pagebar"><button id="prevPage" aria-label="Previous page">&lt;</button><select id="pageSelect" aria-label="Page"></select><button id="nextPage" aria-label="Next page">&gt;</button><button id="addPage">+ Page</button><button id="duplicatePage">Duplicate page</button><button id="removePage">Remove page</button><span class="spacer"></span><label>Copies <input id="copies" type="number" min="1" max="500" step="1" value="1"></label></div>
+<div class="notice" id="preflight" role="status"></div>
+</main>
+<aside class="inspector"><div class="panel-tabs"><button data-panel="properties" class="active">Properties</button><button data-panel="badge">Page</button><button data-panel="layers">Layers</button></div><div id="panel"></div></aside>
+</div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<input hidden type="file" id="imageInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" multiple><input hidden type="file" id="pdfInput" accept="application/pdf" multiple><input hidden type="file" id="projectInput" accept=".json"><input hidden type="file" id="csvInput" accept=".csv,text/csv">
+<input hidden type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2">
+<div id="saveRecovery" hidden role="alert">Autosave is paused. Download a backup with Save Project before loading the latest saved workspace. <button id="loadSavedWorkspace">Load latest saved workspace</button></div>
+<dialog id="libraryDialog"><div class="dialog-head"><h2>My saved designs</h2><button data-close="libraryDialog" aria-label="Close library">X</button></div><p class="hint">Private to this browser and address. Clearing browser data removes these copies. Download a project backup before changing browsers or moving computers.</p><button id="saveToLibrary" class="primary">Save current project as a new copy</button><div id="libraryList"></div></dialog>
+<dialog id="auditDialog"><div class="dialog-head"><h2>Production checks</h2><button data-close="auditDialog" aria-label="Close checks">X</button></div><p class="hint">Warnings are advisory. Text measurements are approximate; shadows, curves and intentionally bleeding art need visual review. These checks do not certify printer or scanner performance.</p><div id="auditResults"></div><div class="actions"><button data-action="calibration">Download 100 mm calibration PDF</button></div></dialog>
+<dialog id="exportDialog">
+<div class="dialog-head"><div><span class="eyebrow">PRODUCTION OUTPUT</span><h2>Export / Gang up</h2></div><button data-close="exportDialog" aria-label="Close export">X</button></div>
+<div class="form-grid">
+<label>Format<select id="exportFormat"><option value="pdf">PDF print sheets / multiple copies</option><option value="png">PNG - single current badge</option><option value="jpg">JPG - single current badge</option><option value="svg">SVG - single current badge</option></select></label>
+<label>Resolution<select id="exportDpi"><option>300</option><option>600</option><option>1200</option></select></label>
+<label>Output paper size<select id="sheetPreset"><option value="a4">A4 - 210 x 297 mm</option><option value="12x18">12 x 18 inches - 304.8 x 457.2 mm</option><option value="13x19">13 x 19 inches - 330.2 x 482.6 mm</option><option value="custom">Custom size in mm</option></select></label>
+<label>Designs to print<select id="exportScope"><option value="current">Current badge / image only</option><option value="all">All badge pages / designs</option></select></label>
+<label>Gang-up layout<select id="exportLayout"><option value="gangup">Gang up together on shared sheets</option><option value="separate">Separate sheets for each design</option></select></label>
+<label>Packing method<select id="exportPacking"><option value="rows">Rows - preserve design order</option><option value="smart">Space-saving rectangles - may reorder</option></select></label><label class="check"><input type="checkbox" id="exportRotate">Allow 90-degree rotation in space-saving mode</label>
+<label>Paper orientation<select id="sheetOrientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+<label>Sheet width (mm)<input id="sheetW" type="number" value="210" min="10" max="1000" step="any"></label><label>Sheet height (mm)<input id="sheetH" type="number" value="297" min="10" max="1000" step="any"></label>
+<label>Margin (mm)<input id="sheetMargin" type="number" value="5" min="0" max="100" step="any"></label><label>Gap between copies (mm)<input id="sheetGap" type="number" value="2" min="0" max="100" step="any"></label>
+</div>
+<fieldset id="exportQuantityControls"><legend>Number of copies</legend><div class="row"><label>Set quantity<input id="exportCopies" type="number" min="0" max="500" step="1" value="1"></label><button id="applyExportCopies">Apply to listed designs</button></div><p class="hint">Edit each design below. Zero skips a design. Fill one sheet calculates copies at the exact cut size. Maximum 500 total copies; overflow continues onto more PDF sheets. These quantities apply to this export only.</p><div id="exportQuantities"></div></fieldset>
+<label class="check"><input type="checkbox" id="exportCut" checked>Print cut outlines (safe/face guides are never exported)</label>
+<p class="hint">RGB inkjet output. Badge dimensions are not resized to fill the paper. Print at Actual Size / 100%. PNG/JPG/SVG export one badge only; choose PDF for gang-up and multiple copies.</p>
+<div id="exportSummary" class="notice" aria-live="polite"></div><div id="sheetNavigation" class="row" hidden><button id="previousSheet">Previous sheet</button><span id="sheetPreviewPage" aria-live="polite"></span><button id="nextSheet">Next sheet</button></div><div id="sheetPreview"></div><progress id="exportProgress" aria-label="Export progress" max="1" value="0"></progress>
+<div class="actions"><button id="cancelExport">Cancel</button><button class="primary" id="runExport">Generate output</button></div>
+</dialog>
+<dialog id="cropDialog"><div class="dialog-head"><h2>Crop image</h2><button data-close="cropDialog">X</button></div><p class="hint">Drag a selection. Zoom and pan only change this view. Rotate changes the source orientation on Apply; Undo restores it.</p><canvas id="cropCanvas" width="650" height="400"></canvas><div class="form-grid"><label>Aspect<select id="cropAspect"><option value="free">Free</option><option value="1">1:1</option><option value="1.333333333">4:3</option><option value="0.75">3:4</option><option value="badge">Badge face</option></select></label><label>Crop shape<select id="cropShape"><option value="rect">Rectangle</option><option value="round">Ellipse / round</option></select></label><label>Preview zoom <output id="cropZoomLabel">100%</output><input id="cropZoom" type="range" min="100" max="300" value="100"></label><label>Horizontal pan<input id="cropPanX" type="range" min="-100" max="100" value="0"></label><label>Vertical pan<input id="cropPanY" type="range" min="-100" max="100" value="0"></label></div><div class="row"><button id="cropRotateLeft">Rotate -90</button><button id="cropRotateRight">Rotate +90</button></div><div class="actions"><button id="resetCrop">Reset Crop</button><button class="primary" id="applyCrop">Apply Crop</button></div></dialog>
+<script id="badgeStartupGuard">
+(() => {
+  const get=id=>document.getElementById(id);
+  let timer,ready=false;
+  function showIssue(message){
+    if(ready)return;
+    clearTimeout(timer);
+    get('badgeStartup').hidden=false;
+    get('badgeStartupTitle').textContent='Badge Designer needs the local studio';
+    get('badgeStartupMessage').textContent=message;
+    get('badgeStartup').setAttribute('role','alert');
+  }
+  if(location.protocol==='file:'){
+    showIssue('This page was opened as a file. The browser blocks the modules that load the catalogue cards.');
+    get('badgeLaunchHelp').hidden=false;
+    get('catalogueHome').hidden=true;
+    return;
+  }
+  function loadError(){
+    showIssue('The catalogue scripts could not start. Retry once. If this continues, restart Start Badge Studio.cmd and check that the app files are complete.');
+    if(!ready)get('badgeRetry').hidden=false;
+  }
+  get('badgeRetry').onclick=()=>location.reload();
+  window.addEventListener('error',loadError,true);
+  window.addEventListener('unhandledrejection',loadError);
+  document.addEventListener('badge-studio-ready',()=>{
+    ready=true;clearTimeout(timer);get('badgeStartup').hidden=true;
+    window.removeEventListener('error',loadError,true);
+    window.removeEventListener('unhandledrejection',loadError);
+  },{once:true});
+  timer=setTimeout(()=>{
+    showIssue('The catalogue is taking longer than expected to start. Retry loading, or close another tab that is upgrading the local design storage.');
+    if(!ready)get('badgeRetry').hidden=false;
+  },20000);
+})();
+</script>
+<script src="vendor/qr/qrcode.js"></script><script src="vendor/qr/qrcode_UTF8.js"></script><script src="vendor/barcode/dist/JsBarcode.all.min.js"></script><script src="vendor/pdf-lib/pdf-lib.min.js"></script><script type="module" src="app.js"></script>
+</body></html>

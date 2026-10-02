@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "channel": "preview",
+  "feedUrl": "",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA9UkFPttm4aTjcd3v3On4NT3Nd5gBDT/MKQV5dTj7Nig=\n-----END PUBLIC KEY-----\n",
+  "checkIntervalHours": 6
+}
