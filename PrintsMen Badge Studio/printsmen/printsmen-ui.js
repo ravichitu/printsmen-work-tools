@@ -76,6 +76,68 @@
         info('Correct Inputs Before Export', problems.join('\n'));
       }
     }, true);
+
+    // Keep every legacy output action visible while it is working. The older
+    // tools have their own export implementations, so this shared layer
+    // observes the common export button and the existing toast result.
+    const outputStatus = document.createElement('section');
+    outputStatus.className = 'studio-output-status';
+    outputStatus.hidden = true;
+    outputStatus.setAttribute('role', 'status');
+    outputStatus.setAttribute('aria-live', 'polite');
+    outputStatus.innerHTML = '<div class="studio-output-copy"><strong></strong><span></span></div><progress max="1" aria-label="Output progress"></progress>';
+    document.body.append(outputStatus);
+    const outputTitle = outputStatus.querySelector('strong');
+    const outputMessage = outputStatus.querySelector('span');
+    const outputBar = outputStatus.querySelector('progress');
+    let activeOutput = null;
+    let outputHideTimer = null;
+    const outputProgress = window.printsmenOutputProgress = {
+      start(button) {
+        activeOutput = button;
+        clearTimeout(outputHideTimer);
+        outputStatus.hidden = false;
+        outputStatus.dataset.state = 'working';
+        outputStatus.setAttribute('aria-busy', 'true');
+        outputTitle.textContent = 'Creating output';
+        outputMessage.textContent = (button.textContent || 'Export').replace(/\s+/g, ' ').trim() + ' is in progress. Keep this window open.';
+        outputBar.removeAttribute('value');
+      },
+      update(message) {
+        if(!activeOutput) return;
+        outputMessage.textContent = message || 'Processing artwork...';
+      },
+      finish(state, message) {
+        if(!activeOutput) return;
+        outputStatus.dataset.state = state;
+        outputStatus.removeAttribute('aria-busy');
+        outputTitle.textContent = state === 'done' ? 'Output ready' : 'Output needs attention';
+        outputMessage.textContent = message || (state === 'done' ? 'The file is ready.' : 'The export could not be completed.');
+        outputBar.value = state === 'done' ? 1 : 0;
+        const finishedButton = activeOutput;
+        activeOutput = null;
+        outputHideTimer = setTimeout(() => {
+          outputStatus.hidden = true;
+          if(finishedButton) finishedButton.removeAttribute('aria-busy');
+        }, 5000);
+      }
+    };
+    document.addEventListener('click', event => {
+      const button = event.target.closest('.page .export-btn');
+      if(button && !button.disabled) outputProgress.start(button);
+    }, true);
+    const originalShowToast = window.showToast;
+    if(typeof originalShowToast === 'function') {
+      window.showToast = function(message, kind) {
+        if(activeOutput) {
+          if(kind === 'success') outputProgress.finish('done', message);
+          else if(kind === 'error') outputProgress.finish('error', message);
+          else outputProgress.update(message);
+        }
+        return originalShowToast.apply(this, arguments);
+      };
+    }
+
     const uploadStatus = document.createElement('div');
     uploadStatus.className = 'studio-status';
     uploadStatus.hidden = true;
