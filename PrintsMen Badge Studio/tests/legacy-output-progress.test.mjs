@@ -18,8 +18,11 @@ test('legacy production catalog keeps every output button and shared progress ho
   }
   assert.match(ui, /printsmenOutputProgress/);
   assert.match(ui, /closest\('\.page \.export-btn'\)/);
+  assert.match(ui, /homeToolSearch/);
+  assert.match(ui, /data-home-filter/);
   assert.match(ui, /window\.showToast = function/);
   assert.match(css, /\.studio-output-status/);
+  assert.match(css, /\.studio-home-tools/);
 });
 
 test('production home catalog opts into lightweight card rendering', () => {

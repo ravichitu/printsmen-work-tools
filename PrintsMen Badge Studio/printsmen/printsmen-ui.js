@@ -42,6 +42,55 @@
     const sync = () => document.body.classList.toggle('studio-home', !!document.querySelector('.tab.active[data-page="page0"]'));
     new MutationObserver(sync).observe(ribbon, { subtree:true, attributes:true, attributeFilter:['class'] });
     sync();
+
+    // Turn the long production catalogue into a searchable launch surface.
+    // This is navigation-only: filtering never changes a tool's state.
+    const homePage = document.getElementById('page0');
+    const homeHero = homePage?.querySelector('.home-hero');
+    const homeGrid = homePage?.querySelector('.home-grid');
+    if(homeHero && homeGrid) {
+      const homeDock = document.createElement('section');
+      homeDock.className = 'studio-home-tools';
+      homeDock.setAttribute('aria-label', 'Find a production tool');
+      homeDock.innerHTML = '<div class="studio-home-search"><label for="homeToolSearch">Find a tool, size or format</label><input id="homeToolSearch" type="search" autocomplete="off" placeholder="Try: passport, 13x19, PDF or UV"><span id="homeToolCount" role="status"></span></div><div class="studio-home-filters" role="group" aria-label="Tool categories"><button type="button" class="active" data-home-filter="all">All tools</button><button type="button" data-home-filter="layout">Layout</button><button type="button" data-home-filter="photo">Photo</button><button type="button" data-home-filter="output">Output</button><button type="button" data-home-filter="studio">Studio</button><button type="button" data-home-filter="production">Production</button></div><p class="studio-home-empty" hidden>No tools match that search. Try a size such as A4, 12×18 or 13×19.</p>';
+      homeHero.after(homeDock);
+      const search = homeDock.querySelector('#homeToolSearch');
+      const counter = homeDock.querySelector('#homeToolCount');
+      const empty = homeDock.querySelector('.studio-home-empty');
+      const cards = Array.from(homeGrid.querySelectorAll('.home-card'));
+      const categoryFor = id => {
+        if(['page1','page2','page3','page4','page7','page8','page9'].includes(id)) return 'layout';
+        if(['page5','page14','page17'].includes(id)) return 'photo';
+        if(['page15','page19'].includes(id)) return 'output';
+        if(['page20','page21'].includes(id)) return 'production';
+        return 'studio';
+      };
+      cards.forEach(card => { card.dataset.toolCategory = categoryFor(card.dataset.jump); });
+      let selectedCategory = 'all';
+      const applyFilter = () => {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
+        cards.forEach(card => {
+          const matchesCategory = selectedCategory === 'all' || card.dataset.toolCategory === selectedCategory;
+          const matchesText = !query || card.textContent.toLowerCase().includes(query);
+          card.hidden = !(matchesCategory && matchesText);
+          if(!card.hidden) visible++;
+        });
+        counter.textContent = `${visible} of ${cards.length} tools`;
+        empty.hidden = visible !== 0;
+      };
+      homeDock.querySelectorAll('[data-home-filter]').forEach(button => button.addEventListener('click', () => {
+        selectedCategory = button.dataset.homeFilter;
+        homeDock.querySelectorAll('[data-home-filter]').forEach(item => item.classList.toggle('active', item === button));
+        applyFilter();
+      }));
+      search.addEventListener('input', applyFilter);
+      document.addEventListener('keydown', event => {
+        if(event.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) { event.preventDefault(); search.focus(); }
+        if(event.key === 'Escape' && document.activeElement === search) { search.value = ''; applyFilter(); search.blur(); }
+      });
+      applyFilter();
+    }
     menu.querySelector('[data-home]').onclick = () => ribbon.querySelector('[data-page="page0"]').click();
     ribbon.querySelectorAll('.tab').forEach(tab => {
       if (tab.dataset.page === 'page0') return;

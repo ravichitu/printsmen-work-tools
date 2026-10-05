@@ -36,7 +36,24 @@ body.studio-navigation-ready .tab-bar { display:none !important; }
 body.studio-home .frame { backdrop-filter:none; }
 body.studio-home .home-stage { contain:layout paint; }
 body.studio-home .home-card { contain:layout paint; contain-intrinsic-size:220px 165px; }
+.studio-home-tools { width:min(1080px,100%); margin:-26px auto 28px; padding:16px; border:1px solid rgba(212,175,55,.42); border-radius:14px; background:linear-gradient(135deg,rgba(43,10,79,.92),rgba(74,26,138,.62)); box-shadow:0 14px 30px rgba(43,10,79,.28),inset 0 1px rgba(255,255,255,.12); }
+.studio-home-search { display:grid; grid-template-columns:minmax(170px,1fr) minmax(250px,2fr) auto; gap:12px; align-items:center; }
+.studio-home-search label { color:var(--gold-bright); font:700 12px/1.4 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+.studio-home-search input { min-width:0; padding:11px 13px; border:1px solid rgba(244,208,63,.55); border-radius:8px; background:rgba(17,4,34,.66); color:#fff7df; font:15px/1.4 Inter,sans-serif; }
+.studio-home-search input::placeholder { color:#c8b98f; }
+.studio-home-search input:focus-visible { outline:3px solid #67e8f9; outline-offset:2px; }
+.studio-home-search span { color:#e8c34a; font:12px/1.4 'JetBrains Mono',monospace; white-space:nowrap; text-align:right; }
+.studio-home-filters { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.studio-home-filters button { padding:7px 11px; border:1px solid rgba(244,208,63,.42); border-radius:999px; background:rgba(17,4,34,.55); color:#f1ddaa; font:600 12px/1.2 Inter,sans-serif; cursor:pointer; }
+.studio-home-filters button:hover,.studio-home-filters button.active { border-color:var(--gold-bright); background:var(--gold-bright); color:var(--violet-deep); }
+.studio-home-empty { margin:13px 0 0; color:#ffe4a0; font-size:14px; }
+body.studio-home .home-card[hidden] { display:none; }
 @media (prefers-reduced-motion:reduce) {
   .studio-output-status progress:not([value]) { animation:none; }
+}
+@media (max-width:700px) {
+  .studio-home-tools { margin:-18px auto 20px; padding:13px; }
+  .studio-home-search { grid-template-columns:1fr; gap:7px; }
+  .studio-home-search span { text-align:left; }
 }
 input[aria-invalid=true] { outline:2px solid #fb7185 !important; }
