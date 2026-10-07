@@ -31,14 +31,15 @@ async function removeOwnedTree(root){
   }
   await rmdir(root);
 }
-export async function applyPreviewUpdate({source,target,beforeWrite=()=>{}}){
+export async function applyPreviewUpdate({source,target,beforeWrite=()=>{},allowSameVersion=false}){
   if((await lstat(target)).isSymbolicLink())throw new Error('Cannot update a linked installation.');
   source=await realpath(source);target=await realpath(target);
   if(source===target||source.startsWith(target+path.sep)||target.startsWith(source+path.sep))throw new Error('Update staging and installation must be separate.');
   const marker=JSON.parse(await readFile(path.join(target,'.preview-installation.json'),'utf8'));
   if(marker.product!==UPDATE_PRODUCT||typeof marker.installationId!=='string'||path.resolve(marker.root).toLowerCase()!==target.toLowerCase())throw new Error('The preview installation identity does not match this directory.');
   const old=await manifest(target),next=await manifest(source);
-  if(compareVersions(next.version,old.version)<=0)throw new Error('An update must be newer than the installed version.');
+  const versionOrder=compareVersions(next.version,old.version);
+  if(versionOrder<0||(!allowSameVersion&&versionOrder===0))throw new Error(versionOrder<0?'The installer is older than the installed version.':'The same version is already installed.');
   const oldFiles=new Map(old.files.map(f=>[f.path.toLowerCase(),f]));
   for(const file of next.files){
     if(sha256(await readFile(await safeFile(source,file.path)))!==file.hash)throw new Error('Update payload failed verification: '+file.path);
@@ -95,7 +96,7 @@ export async function applyPreviewUpdate({source,target,beforeWrite=()=>{}}){
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const source=fileURLToPath(new URL('../',import.meta.url)),target=process.argv[2];
   if(!target)throw new Error('Provide the registered preview installation directory.');
-  const result=await applyPreviewUpdate({source,target});console.log(JSON.stringify(result));
+  const result=await applyPreviewUpdate({source,target,allowSameVersion:process.argv.includes('--repair')});console.log(JSON.stringify(result));
   // The installer invokes this from its temporary runtime, so the installed runtime can be replaced.
   if(process.argv.includes('--restart')){
     const child=spawn(path.join(target,'runtime','node.exe'),[path.join(target,'start.mjs'),'--no-open'],{cwd:target,detached:true,stdio:'ignore',windowsHide:true});child.unref();

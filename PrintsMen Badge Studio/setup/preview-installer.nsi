@@ -77,7 +77,7 @@ Section "Install"
     InitPluginsDir
     SetOutPath "$PLUGINSDIR\payload"
     File /r "${PAYLOAD}\*"
-    nsExec::ExecToStack '"$PLUGINSDIR\payload\runtime\node.exe" "$PLUGINSDIR\payload\setup\apply-preview-update.mjs" "$INSTDIR" --restart'
+    nsExec::ExecToStack '"$PLUGINSDIR\payload\runtime\node.exe" "$PLUGINSDIR\payload\setup\apply-preview-update.mjs" "$INSTDIR" --restart --repair'
   ${Else}
     SetOutPath "$INSTDIR"
     File /r "${PAYLOAD}\*"

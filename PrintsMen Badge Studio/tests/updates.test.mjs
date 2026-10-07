@@ -85,6 +85,17 @@ test('in-place update preserves identity, operator settings, trust key and user 
   assert.equal(await access(path.join(f.target,'old.js')).then(()=>true,()=>false),false);
   assert.equal(await access(path.join(f.target,'.update-pending')).then(()=>true,()=>false),false);
 });
+test('same-version installer repair is allowed but downgrades remain blocked',async t=>{
+  const f=await updateFixture(t);
+  await applyPreviewUpdate(f);
+  await assert.rejects(()=>applyPreviewUpdate({...f}),/same version/);
+  const result=await applyPreviewUpdate({...f,allowSameVersion:true});
+  assert.equal(result.version,'0.7.0-preview.1');
+  const sourceManifest=JSON.parse(await readFile(path.join(f.source,'preview-manifest.json'),'utf8'));
+  sourceManifest.version='0.5.0-preview.1';
+  await writeFile(path.join(f.source,'preview-manifest.json'),JSON.stringify(sourceManifest));
+  await assert.rejects(()=>applyPreviewUpdate({...f,allowSameVersion:true}),/older/);
+});
 test('failed file update rolls back the changed application files',async t=>{
   const f=await updateFixture(t),oldManifest=await readFile(path.join(f.target,'preview-manifest.json'),'utf8');
   await assert.rejects(()=>applyPreviewUpdate({...f,beforeWrite:name=>{if(name==='new/data.txt')throw new Error('Simulated disk failure');}}),/disk failure/);
