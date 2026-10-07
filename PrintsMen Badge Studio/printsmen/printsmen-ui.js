@@ -211,7 +211,7 @@
       window[key] = async function(files) {
         if(busy) { info('Import in progress', 'Wait for this import to finish or cancel it before starting another.'); return; }
         const list = Array.from(files);
-        if(list.length > 500) { info('Import limit', 'Choose up to 500 files per batch.'); return; }
+        if(list.length > 1000) { info('Import limit', 'Choose up to 1000 files per batch.'); return; }
         const pageNumber=(key.match(/\d+/)||[])[0];
         const filename=document.getElementById('filename'+pageNumber)||document.getElementById('p'+pageNumber+'Filename');
         const manualName=filename?.dataset.manualName==='true'?filename.value:null;

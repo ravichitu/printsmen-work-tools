@@ -73,7 +73,7 @@ This register is the implementation checklist for the 75-item production upgrade
 | 67 | 90-150 DPI preview choices | Complete | Shared DPI dialog includes draft and proof choices. |
 | 68 | One large 600 DPI sheet at a time | Complete | Estimate warns when a 600 DPI job contains multiple sheets. |
 | 69 | 12x18, 13x19 and custom tiling | Complete | Paper geometry and custom-size shelf packing are retained. |
-| 70 | Bulk file queue | Complete | 500-file shared import ceiling and sequential handlers are active. |
+| 70 | Bulk file queue | Complete | 1,000-file shared import ceiling and sequential handlers are active. |
 | 71 | Display estimates before heavy work | Complete | Custom Size shows pixel and peak-memory estimate during output. |
 | 72 | Warn effective DPI | Complete | Source quality is visible per uploaded file. |
 | 73 | Vector PDF text/shapes | Complete | Designer SVG/vector path is preserved; raster-only legacy imports are labelled. |
@@ -82,6 +82,6 @@ This register is the implementation checklist for the 75-item production upgrade
 
 ## 0.9.5 high-load change
 
-Standard Imposition and Custom Size no longer rebuild the whole upload list after every file. Image imports use object URLs instead of base64 copies, preview decoding is limited to the visible sheet, long lists are paginated at 50 rows, Custom Size preview is capped to 120 visible slots, and output embeds each source only when its sheet needs it. This is the change that addresses the reported 500-image hang.
+Standard Imposition and Custom Size no longer rebuild the whole upload list after every file. Image imports use object URLs instead of base64 copies, preview decoding is limited to the visible sheet, long lists are paginated at 50 rows, Custom Size preview is capped to 120 visible slots, and output embeds each source only when its sheet needs it. The shared import and sequential output ceiling is now 1,000 items; the pixel, canvas-edge and working-memory guards still protect the browser from unsafe jobs.
 
 The bounded colour-management items are intentionally labelled rather than pretending that an RGB browser canvas is a colour-managed CMYK RIP. The local UV path remains available for the CMYK and W1/W2 workflow; native ICC/PDF-X production should be added only with a bundled colour engine and a printer profile.

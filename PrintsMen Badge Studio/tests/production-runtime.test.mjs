@@ -28,14 +28,14 @@ test('effective DPI and quality warnings use the placed physical size', () => {
   assert.equal(sourceQuality({pixelWidth:400,pixelHeight:200,targetWidthMm:101.6,targetHeightMm:50.8,requestedDpi:300}).level, 'low');
 });
 
-test('production queue processes 500 jobs sequentially and enforces the limit', async () => {
+test('production queue processes 1000 jobs sequentially and enforces the limit', async () => {
   const order = [];
   const queue = new ProductionQueue({worker:async value => order.push(value)});
   queue.add(Array.from({length:MAX_BATCH_FILES}, (_, index) => index));
-  assert.throws(() => queue.add([501]), /500 jobs/);
+  assert.throws(() => queue.add([1001]), /1000 jobs/);
   const result = await queue.run();
   assert.equal(result.state, 'complete');
-  assert.equal(result.completed, 500);
+  assert.equal(result.completed, 1000);
   assert.deepEqual(order.slice(0, 3), [0, 1, 2]);
-  assert.deepEqual(order.slice(-3), [497, 498, 499]);
+  assert.deepEqual(order.slice(-3), [997, 998, 999]);
 });

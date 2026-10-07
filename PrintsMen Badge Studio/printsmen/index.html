@@ -5911,7 +5911,7 @@ $(document).on('click', '.tab', function(){
 });
 
 // ====================  FILE UPLOAD (shared logic)  ====================
-const MAX_BATCH_FILES = 500;
+const MAX_BATCH_FILES = 1000;
 const MAX_PDF_PAGES = 100;
 const MAX_IMPORT_PIXELS = 240000000;
 const FILE_LIST_PAGE_SIZE = 50;
@@ -10927,7 +10927,7 @@ async function exportCustomSizePDF(){
     const MM_PT = 72 / 25.4;
     const cropColor = rgb(0.16, 0.04, 0.31);
 
-    // Embed only when a sheet needs an item. This keeps a 500-file job responsive
+    // Embed only when a sheet needs an item. This keeps a 1000-file job responsive
     // and avoids decoding every source before the first output page is built.
     const embedded = new Map();
     async function embeddedAt(fileIdx){

@@ -1,5 +1,5 @@
 export const DPI_PRESETS = Object.freeze([90, 150, 200, 300, 360, 600]);
-export const MAX_BATCH_FILES = 500;
+export const MAX_BATCH_FILES = 1000;
 export const MAX_CANVAS_EDGE = 16384;
 export const MAX_WORKING_BYTES = 1.5 * 1024 ** 3;
 
@@ -76,7 +76,7 @@ export class ProductionQueue {
 
   add(items) {
     const additions = Array.from(items || []);
-    if (this.jobs.length + additions.length > MAX_BATCH_FILES) throw new RangeError('Queue supports up to 500 jobs');
+    if (this.jobs.length + additions.length > MAX_BATCH_FILES) throw new RangeError('Queue supports up to 1000 jobs');
     this.jobs.push(...additions);
     this.onProgress(this.snapshot());
     return this.jobs.length;

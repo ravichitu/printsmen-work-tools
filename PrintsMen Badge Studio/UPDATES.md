@@ -28,18 +28,39 @@ the same bundled runtime and operator sign-in as the studio.
 
 ## Hosting Status
 
-Release hosting is not configured. The manager explicitly reports this and makes
-no update download requests until the owner supplies an HTTPS feed. The update
-verification public key can be pinned before hosting is selected. Only public
-configuration is distributed; no signing private key is in the installer.
+GitHub Releases is now the prepared update transport. The application points to
+the stable HTTPS asset URL:
+
+```text
+https://github.com/ravichitu/printsmen-work-tools/releases/latest/download/printsmen-update.json
+```
+
+The manager follows GitHub's release-asset redirects, then verifies the signed
+Ed25519 envelope, installer byte count and SHA-256 before it can install. Only
+public configuration is distributed; no signing private key is in the installer.
+
+The repository workflow at `.github/workflows/release-preview.yml` runs on a
+matching `vX.Y.Z` tag. It tests the app, builds the installer and portable ZIP,
+creates `printsmen-update.json`, and publishes all three as GitHub Release
+assets. Configure the repository's protected `printsmen-release` environment
+with the secret `PRINTSMEN_UPDATE_PRIVATE_KEY`, containing the Ed25519 PKCS#8
+private PEM that matches the public key pinned in `updates-config.json`. Keep
+that secret owner-only and require environment approval for release runs.
+
+The workflow is intentionally tag-driven: ordinary branch pushes do not ship an
+installer. Push the code, review it, then create and push a matching tag such as
+`v0.9.6`. The current 0.9.5 installer was built before this GitHub feed was
+configured, so it needs one manual install of a later GitHub-enabled release;
+subsequent releases can update automatically while the studio is idle.
 
 Owner-only release commands, from the separate PrintsMen Licence Manager folder:
 
 ```powershell
 node update-releases.mjs init
 node update-releases.mjs configure --offline
-# Later, configure HTTPS hosting and rebuild/distribute its public configuration:
-node update-releases.mjs configure https://YOUR-HOST/printsmen/latest.json
+# For the GitHub workflow, configure the same public key and feed URL locally:
+node update-releases.mjs configure https://github.com/ravichitu/printsmen-work-tools/releases/latest/download/printsmen-update.json
+# Manual owner publishing remains available when a release is not built by Actions:
 node update-releases.mjs publish PATH-TO-SETUP.exe 0.7.1 https://YOUR-HOST/printsmen/setup-0.7.1.exe NEW-signed-update.json "Release notes"
 ```
 

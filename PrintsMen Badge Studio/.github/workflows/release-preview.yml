@@ -1,0 +1,94 @@
+name: Build and publish PrintsMen preview
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: printsmen-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    environment: printsmen-release
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate release version and locate Node licence
+        shell: pwsh
+        run: |
+          $package = Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json
+          if ($env:GITHUB_REF_NAME -ne "v$($package.version)") {
+            throw "Tag $env:GITHUB_REF_NAME does not match package version $($package.version)."
+          }
+          $nodeDir = Split-Path -Parent (Get-Command node).Source
+          $candidates = @()
+          $candidates += Get-ChildItem -LiteralPath $nodeDir -File -ErrorAction SilentlyContinue
+          $candidates += Get-ChildItem -LiteralPath $env:RUNNER_TOOL_CACHE -Filter 'LICENSE*' -File -Recurse -ErrorAction SilentlyContinue
+          $license = $candidates | Where-Object {
+            $_.Length -gt 10000 -and (Get-Content -Raw -LiteralPath $_.FullName -ErrorAction SilentlyContinue) -match 'Node\.js'
+          } | Select-Object -First 1
+          if (-not $license) { throw 'The complete Node.js redistribution licence was not found on the runner.' }
+          "NODE_LICENSE=$($license.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          choco install nsis --yes --no-progress
+          $compiler = (Get-Command makensis.exe -ErrorAction Stop).Source
+          "MAKENSIS=$compiler" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run production tests
+        run: npm test
+        working-directory: PrintsMen Badge Studio
+
+      - name: Build package and installer
+        shell: pwsh
+        working-directory: PrintsMen Badge Studio
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          npm run package
+          $package = Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json
+          $version = $package.version
+          $installerName = "PrintsMen-Badge-Studio-$version-Preview-Setup.exe"
+          $installerDir = Join-Path $env:GITHUB_WORKSPACE 'PrintsMen Badge Studio\dist\installer'
+          node scripts/build-preview-installer.mjs $installerDir $env:MAKENSIS $env:NODE_LICENSE
+          Copy-Item -LiteralPath (Join-Path $installerDir $installerName) -Destination (Join-Path $env:GITHUB_WORKSPACE "PrintsMen Badge Studio\dist\$installerName")
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "PrintsMen-Badge-Studio-Local-$version.zip") -Destination (Join-Path $env:GITHUB_WORKSPACE "PrintsMen Badge Studio\dist\PrintsMen-Badge-Studio-Local-$version.zip")
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "INSTALLER_NAME=$installerName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Create signed update feed
+        shell: pwsh
+        working-directory: PrintsMen Badge Studio
+        env:
+          PRINTSMEN_UPDATE_PRIVATE_KEY: ${{ secrets.PRINTSMEN_UPDATE_PRIVATE_KEY }}
+        run: |
+          $installerUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:GITHUB_REF_NAME/$env:INSTALLER_NAME"
+          node scripts/create-update-feed.mjs "dist\$env:INSTALLER_NAME" "$env:VERSION-preview.1" $installerUrl dist\printsmen-update.json "PrintsMen $env:VERSION preview update."
+
+      - name: Publish GitHub release assets
+        shell: pwsh
+        working-directory: PrintsMen Badge Studio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create $env:GITHUB_REF_NAME `
+            "dist\$env:INSTALLER_NAME" `
+            "dist\PrintsMen-Badge-Studio-Local-$env:VERSION.zip" `
+            'dist\printsmen-update.json' `
+            --title "PrintsMen $env:VERSION" `
+            --notes "Automated preview release. The installer is not Authenticode-signed yet; verify the published SHA-256 before distribution."

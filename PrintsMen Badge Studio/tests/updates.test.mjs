@@ -24,7 +24,7 @@ async function temp(t){const base=await mkdtemp(path.join(tmpdir(),'printsmen-up
 async function manager(t,options={}){
   const cache=await temp(t);let clock=1000,launches=0;
   const result=new UpdateManager({root,config,version:'0.7.0',cache,installed:true,now:()=>clock,launch:async()=>{launches++;},fetcher:async(url,init)=>{
-    assert.equal(init.redirect,'error');return new Response(url.endsWith('feed.json')?JSON.stringify(signed()):installer);
+    assert.equal(init.redirect,'follow');return new Response(url.endsWith('feed.json')?JSON.stringify(signed()):installer);
   },...options});
   return {manager:result,advance:ms=>clock+=ms,get launches(){return launches;}};
 }

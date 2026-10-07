@@ -39,7 +39,10 @@ export class UpdateManager {
     if(this.working||this.phase==='installing')return this.status();
     this.working=true;this.phase='checking';this.message='Checking the owner release feed...';
     try{
-      const response=await this.fetcher(this.config.feedUrl,{redirect:'error',signal:AbortSignal.timeout(20000),headers:{Accept:'application/json'}});
+      // GitHub's stable release-asset URL redirects to the current release. The
+      // envelope is still verified before it is trusted, so the redirect only
+      // selects the bytes that are later checked with the pinned Ed25519 key.
+      const response=await this.fetcher(this.config.feedUrl,{redirect:'follow',signal:AbortSignal.timeout(20000),headers:{Accept:'application/json'}});
       if(!response.ok)throw new Error('Update feed returned HTTP '+response.status+'.');
       let size=0;const chunks=[];
       for await(const chunk of response.body){size+=chunk.length;if(size>32768)throw new Error('Update feed is too large.');chunks.push(chunk);}
@@ -60,7 +63,9 @@ export class UpdateManager {
       const file=path.join(this.cache,release.version+'-'+release.sha256.slice(0,16)+'.exe');temp=file+'.'+randomUUID()+'.part';
       const handle=await open(temp,'wx');let length=0;const hash=createHash('sha256');
       try{
-        const response=await this.fetcher(release.url,{redirect:'error',signal:AbortSignal.timeout(300000)});
+        // GitHub release downloads redirect to their content-addressed CDN URL.
+        // The signed URL, byte count and SHA-256 are verified before install.
+        const response=await this.fetcher(release.url,{redirect:'follow',signal:AbortSignal.timeout(300000)});
         if(!response.ok)throw new Error('Installer download returned HTTP '+response.status+'.');
         for await(const chunk of response.body){length+=chunk.length;if(length>release.bytes||length>MAX_INSTALLER)throw new Error('Installer size does not match the signed release.');hash.update(chunk);await handle.writeFile(chunk);}
       }finally{await handle.close();}
