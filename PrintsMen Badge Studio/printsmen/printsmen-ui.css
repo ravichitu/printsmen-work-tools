@@ -22,6 +22,12 @@ body.studio-navigation-ready .tab-bar { display:none !important; }
 .studio-dialog::backdrop { background:#0009; }
 .studio-dialog button { padding:10px 20px; background:#edcd77; color:#29143f; border:0; border-radius:6px; font-size:16px; }
 .studio-status { position:fixed; right:18px; bottom:18px; max-width:min(460px,90vw); padding:12px 18px; background:#29143f; color:#ffe4a0; border:1px solid #edcd77; border-radius:8px; z-index:10000; font-size:15px; }
+.batch-file-pager { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; padding:8px; border:1px solid rgba(212,175,55,.35); background:rgba(20,5,38,.45); color:#ffe4a0; font:600 11px 'JetBrains Mono',monospace; }
+.batch-file-pager button { min-height:30px; padding:5px 9px; border:1px solid #d4af37; border-radius:4px; background:#2b0a4f; color:#ffe4a0; cursor:pointer; }
+.batch-file-pager button:disabled { opacity:.35; cursor:not-allowed; }
+.source-dpi.good { color:#8fe388; }
+.source-dpi.warn { color:#ffd966; }
+.source-dpi.low { color:#ff8a8a; font-weight:700; }
 .studio-output-status { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); width:min(520px,calc(100vw - 36px)); padding:14px 18px; background:#241437f2; color:#fff0d0; border:1px solid #edcd77; border-radius:10px; box-shadow:0 12px 32px #0008; z-index:10001; font:14px/1.45 Inter,sans-serif; }
 .studio-output-copy { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:9px; }
 .studio-output-copy strong { color:#ffe4a0; font-size:15px; }

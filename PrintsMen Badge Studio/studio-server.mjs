@@ -7,7 +7,7 @@ import {TOOL_CATALOG} from './licensing/catalog.mjs';
 import {json, readJson, sameOrigin} from './licensing/http.mjs';
 
 const publicFiles = new Set(['activation.html','activation.css','activation.js','login.html','login.js']);
-const runtimeFiles = new Set(['index.html','dashboard.html','dashboard.css','dashboard.js','badge.html','badge-sizes.html','app.js','catalogue.js','core.js','render.js','files.js','fonts.js','storage.js',
+const runtimeFiles = new Set(['index.html','dashboard.html','dashboard.css','dashboard.js','badge.html','badge-sizes.html','app.js','catalogue.js','core.js','render.js','files.js','fonts.js','storage.js','production-runtime.mjs',
   'crop.js','export.js','print-plan.js','packing.js','photo.js','photo-editor.js','faces.js','face-worker.js','legacy-photo-framing.js','style.css','editor.css','badge-theme.css','session.js','updates.html','updates.js','updates.css','updates-client.js',
   'assistant.js','assistant.css','automation-core.js','naming.js','products.html','products.js','products.css','products-core.js','product-pdf.js']);
 const sharedFiles=new Set(['index.html','dashboard.html','dashboard.css','dashboard.js','session.js','assistant.js','assistant.css','automation-core.js','naming.js','core.js','faces.js','face-worker.js','legacy-photo-framing.js']);

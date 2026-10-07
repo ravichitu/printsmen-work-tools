@@ -4554,7 +4554,6 @@ KAKINADA</textarea>
           <select id="p15ExportDpi" style="width:100%;padding:8px 10px;background:#1a0833;border:1px solid var(--rule-soft);color:var(--gold);font-family:'JetBrains Mono',monospace;border-radius:3px;">
             <option value="300">300 DPI · standard UV print</option>
             <option value="600">600 DPI · high detail</option>
-            <option value="1200">1200 DPI · maximum detail</option>
           </select>
           <div style="margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);line-height:1.5;">Background remains transparent. TIFF and PDF export in CMYK. PNG preserves transparency but is RGBA because the PNG format does not support CMYK.</div>
         </div>
@@ -5011,7 +5010,6 @@ KAKINADA</textarea>
           <select id="p19Dpi" style="width:100%;padding:8px 10px;background:#1a0833;border:1px solid var(--rule-soft);color:var(--gold);font-family:'JetBrains Mono',monospace;border-radius:3px;">
             <option value="300">300 DPI</option>
             <option value="600">600 DPI</option>
-            <option value="1200">1200 DPI</option>
           </select>
           <label class="field" for="p19Filename">Output filename</label><input id="p19Filename" type="text" value="uv_artwork" maxlength="80">
           <button class="export-btn" id="p19Export" disabled style="margin-top:12px;">Export Artwork</button>
@@ -5490,31 +5488,39 @@ KAKINADA</textarea>
     <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold-bright);margin-bottom:6px;">Export Resolution (DPI)</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold-soft);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;">Affects all exports until changed</div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
+      <button class="dpi-pill" data-dpi="90" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
+        <strong style="font-size:18px;">90</strong><br/>
+        <span style="font-size:10px;">DPI · Draft</span>
+      </button>
+      <button class="dpi-pill" data-dpi="150" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
+        <strong style="font-size:18px;">150</strong><br/>
+        <span style="font-size:10px;">DPI · Proof</span>
+      </button>
+      <button class="dpi-pill" data-dpi="200" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
+        <strong style="font-size:18px;">200</strong><br/>
+        <span style="font-size:10px;">DPI · Fast</span>
+      </button>
       <button class="dpi-pill active" data-dpi="300" style="padding:14px 10px;background:rgba(212,175,55,0.25);border:1px solid var(--gold);color:var(--gold-bright);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
         <strong style="font-size:18px;">300</strong><br/>
         <span style="font-size:10px;color:var(--gold-soft);">DPI · Standard</span>
+      </button>
+      <button class="dpi-pill" data-dpi="360" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
+        <strong style="font-size:18px;">360</strong><br/>
+        <span style="font-size:10px;">DPI · Inkjet</span>
       </button>
       <button class="dpi-pill" data-dpi="600" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
         <strong style="font-size:18px;">600</strong><br/>
         <span style="font-size:10px;">DPI · High</span>
       </button>
-      <button class="dpi-pill" data-dpi="1200" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--rule-soft);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:pointer;text-align:center;">
-        <strong style="font-size:18px;">1200</strong><br/>
-        <span style="font-size:10px;">DPI · A5 / small only</span>
-      </button>
-      <button class="dpi-pill" data-dpi="2400" style="padding:14px 10px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,80,80,0.3);color:#ff8a8a;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.05em;border-radius:4px;cursor:not-allowed;text-align:center;opacity:0.6;" disabled title="Browser canvas limit (16384 px) prevents 2400 DPI on standard sheet sizes">
-        <strong style="font-size:18px;">2400</strong><br/>
-        <span style="font-size:10px;">Not supported</span>
-      </button>
     </div>
 
     <div style="background:rgba(255,200,80,0.08);border:1px solid rgba(255,200,80,0.3);padding:11px 14px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#ffd966;line-height:1.6;margin-bottom:14px;">
       <strong>About these settings:</strong><br/>
-      • 300 DPI is the print-shop standard. Use this unless your press needs more.<br/>
-      • 600 DPI: 4× larger files, takes 4× longer. Best for fine-detail jobs.<br/>
-      • 1200 DPI: only works on A5-sized sheets or smaller. Larger sheets exceed browser canvas limits and will fail.<br/>
-      • 2400 DPI: not supported in browser. Use Ghostscript post-processing if you need this.
+      • 90–150 DPI is for fast previews and customer proofs.<br/>
+      • 300 DPI is the print-shop default for finished work.<br/>
+      • 360 DPI is useful for many inkjet workflows.<br/>
+      • 600 DPI is reserved for fine detail and is processed one sheet at a time.
     </div>
 
     <button id="dpiClose" style="width:100%;padding:11px;background:linear-gradient(135deg,#d4af37,#b8860b);border:none;color:#1a0833;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;border-radius:4px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;">Close</button>
@@ -5905,6 +5911,66 @@ $(document).on('click', '.tab', function(){
 });
 
 // ====================  FILE UPLOAD (shared logic)  ====================
+const MAX_BATCH_FILES = 500;
+const MAX_PDF_PAGES = 100;
+const MAX_IMPORT_PIXELS = 240000000;
+const FILE_LIST_PAGE_SIZE = 50;
+const IMPORT_PREVIEW_CACHE_SIZE = 64;
+const importedPreviewCache = new Map();
+const legacyPreviewVersions = {1:0, 2:0, 3:0, 4:0};
+let fileListPage1 = 0;
+
+function canvasToBlobAsync(canvas, type = 'image/png', quality){
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not encode artwork')), type, quality);
+  });
+}
+
+function makeObjectUrl(blob){
+  return URL.createObjectURL(blob);
+}
+
+function releaseImportedAsset(item){
+  if(!item) return;
+  importedPreviewCache.delete(item.id);
+  if(item.objectUrl){
+    URL.revokeObjectURL(item.objectUrl);
+    item.objectUrl = '';
+  }
+}
+
+function releaseImportedAssets(items){
+  (items || []).forEach(releaseImportedAsset);
+}
+
+function loadImportedPreview(item){
+  const existing = importedPreviewCache.get(item.id);
+  if(existing){
+    importedPreviewCache.delete(item.id);
+    importedPreviewCache.set(item.id, existing);
+    return existing;
+  }
+  const pending = loadImg(item.dataUrl).catch(err => {
+    importedPreviewCache.delete(item.id);
+    throw err;
+  });
+  importedPreviewCache.set(item.id, pending);
+  while(importedPreviewCache.size > IMPORT_PREVIEW_CACHE_SIZE){
+    const oldest = importedPreviewCache.keys().next().value;
+    importedPreviewCache.delete(oldest);
+  }
+  return pending;
+}
+
+function visiblePreviewFiles(files, slotCount, layoutMode){
+  if(layoutMode === 'single') return files.slice(0, 1);
+  return files.slice(0, Math.min(files.length, Math.max(1, slotCount)));
+}
+
+function importProgress(message){
+  window.printsmenImport?.report(message);
+}
+
 async function processFile(f){
   const items = [];
   if(f.size > 40 * 1024 * 1024) throw new Error('File exceeds the 40 MB import limit');
@@ -5915,7 +5981,7 @@ async function processFile(f){
     const pdf = await printsmenOpenPdf({data: new Uint8Array(buf)});
     try {
     const total = pdf.numPages;
-    if(total > 30) throw new Error('PDF exceeds 30 pages; split the document before importing');
+    if(total > MAX_PDF_PAGES) throw new Error('PDF exceeds ' + MAX_PDF_PAGES + ' pages; split the document before importing');
     const baseName = f.name.replace(/\.pdf$/i, '');
     for(let pn = 1; pn <= total; pn++){
       if(window.printsmenImport?.cancelled) throw new Error('Import cancelled');
@@ -5925,27 +5991,28 @@ async function processFile(f){
       if(viewport.width * viewport.height > 24000000) throw new Error('PDF page is too large at 300 DPI (24 megapixel limit)');
       if(window.printsmenImport) {
         window.printsmenImport.pixels += viewport.width * viewport.height;
-        if(window.printsmenImport.pixels > 60000000) {
+        if(window.printsmenImport.pixels > MAX_IMPORT_PIXELS) {
           window.printsmenImport.cancelled = true;
-          throw new Error('Batch exceeds 60 megapixels; import fewer PDF pages at once');
+          throw new Error('Batch exceeds ' + Math.round(MAX_IMPORT_PIXELS / 1000000) + ' megapixels; import fewer PDF pages at once');
         }
       }
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
       await page.render({canvasContext: canvas.getContext('2d'), viewport, background:'rgba(0,0,0,0)'}).promise;
-      const dataUrl = canvas.toDataURL('image/png');
+      const blob = await canvasToBlobAsync(canvas, 'image/png');
+      const dataUrl = makeObjectUrl(blob);
       canvas.width = canvas.height = 0;
       page.cleanup();
       const id = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
       const pageLabel = total > 1 ? ` (p.${pn}/${total})` : '';
-      items.push({id, name: baseName + pageLabel, dataUrl, thumb: dataUrl, type: f.type, pageNum: pn});
+      items.push({id, name: baseName + pageLabel, dataUrl, thumb: dataUrl, objectUrl:dataUrl, sourceFile:f, type:'image/png', sourceType:f.type, pageNum: pn});
       await new Promise(resolve => setTimeout(resolve, 0));
     }
     } finally { await pdf.destroy(); }
   } else {
-    const dataUrl = await fileToDataURL(f);
+    const dataUrl = makeObjectUrl(f);
     const id = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-    items.push({id, name: f.name, dataUrl, thumb: dataUrl, type: f.type});
+    items.push({id, name: f.name, dataUrl, thumb: dataUrl, objectUrl:dataUrl, sourceFile:f, type: f.type});
   }
   return items;
 }
@@ -5972,31 +6039,53 @@ dropZone.addEventListener('drop', e => handleFiles1(e.dataTransfer.files));
 fileInput.addEventListener('change', e => handleFiles1(e.target.files));
 
 async function handleFiles1(fileList){
-  for(const f of Array.from(fileList)){
-    try { state.files.push(...await processFile(f)); }
+  const files = Array.from(fileList || []).slice(0, MAX_BATCH_FILES);
+  for(let index = 0; index < files.length; index++){
+    const f = files[index];
+    if(window.printsmenImport?.cancelled) break;
+    importProgress('File ' + (index + 1) + ' of ' + files.length + ': ' + f.name);
+    try {
+      const imported = await processFile(f);
+      const available = Math.max(0, MAX_BATCH_FILES - state.files.length);
+      state.files.push(...imported.slice(0, available));
+      releaseImportedAssets(imported.slice(available));
+      if(state.files.length >= MAX_BATCH_FILES) break;
+    }
     catch(err){ console.error(err); showToast('Could not load ' + f.name, 'error'); }
+    if(index % 5 === 4) await new Promise(resolve => setTimeout(resolve, 0));
   }
+  fileListPage1 = Math.max(0, Math.ceil(state.files.length / FILE_LIST_PAGE_SIZE) - 1);
   renderFileList1();
   render();
   fileInput.value = '';
 }
 
 function renderFileList1(){
-  $('#fileList').empty();
-  state.files.forEach(f => {
+  const $list = $('#fileList').empty();
+  const pageCount = Math.max(1, Math.ceil(state.files.length / FILE_LIST_PAGE_SIZE));
+  fileListPage1 = Math.min(Math.max(0, fileListPage1), pageCount - 1);
+  const start = fileListPage1 * FILE_LIST_PAGE_SIZE;
+  state.files.slice(start, start + FILE_LIST_PAGE_SIZE).forEach(f => {
     const $div = $(`
-      <div class="file-item" style="display:none">
+      <div class="file-item">
         <div class="thumb" style="background-image:url('${f.thumb}')"></div>
         <div class="name">${p15Escape(f.name)}</div>
-        <button class="rm" data-id="${f.id}" data-page="1">×</button>
+        <button class="rm" data-id="${f.id}" data-page="1" title="Remove file" aria-label="Remove ${p15Escape(f.name)}">×</button>
       </div>
     `);
-    $('#fileList').append($div);
-    $div.fadeIn(220);
+    $list.append($div);
   });
+  if(pageCount > 1){
+    $list.append(`<div class="batch-file-pager"><button type="button" data-p1-page="prev" ${fileListPage1 === 0 ? 'disabled' : ''}>Previous</button><span>${start + 1}-${Math.min(start + FILE_LIST_PAGE_SIZE, state.files.length)} of ${state.files.length}</span><button type="button" data-p1-page="next" ${fileListPage1 >= pageCount - 1 ? 'disabled' : ''}>Next</button></div>`);
+  }
   $('#fileCount').text(state.files.length + ' file' + (state.files.length===1?'':'s'));
   $('#exportBtn').prop('disabled', state.files.length === 0);
 }
+
+$(document).on('click', '#fileList [data-p1-page]', function(){
+  fileListPage1 += $(this).data('p1-page') === 'next' ? 1 : -1;
+  renderFileList1();
+});
 
 // PAGE 2 file handling
 const dropZone2 = document.getElementById('dropZone2');
@@ -6010,14 +6099,34 @@ const fileInput2 = document.getElementById('fileInput2');
 dropZone2.addEventListener('drop', e => handleFiles2(e.dataTransfer.files));
 fileInput2.addEventListener('change', e => handleFiles2(e.target.files));
 
-async function handleFiles2(fileList){
-  for(const f of Array.from(fileList)){
-    try { state2.files.push(...await processFile(f)); }
-    catch(err){ console.error(err); showToast('Could not load ' + f.name, 'error'); }
+async function importStandardPageFiles(fileList, pageState, renderList, render, input){
+  const files = Array.from(fileList || []).slice(0, MAX_BATCH_FILES);
+  for(let index = 0; index < files.length; index++){
+    const f = files[index];
+    if(window.printsmenImport?.cancelled) break;
+    if(pageState.files.length >= MAX_BATCH_FILES){
+      showToast('Maximum ' + MAX_BATCH_FILES + ' imported items reached', 'error');
+      break;
+    }
+    importProgress('Loading ' + (index + 1) + ' of ' + files.length + ': ' + f.name);
+    try {
+      const imported = await processFile(f);
+      const room = MAX_BATCH_FILES - pageState.files.length;
+      pageState.files.push(...imported.slice(0, room));
+      releaseImportedAssets(imported.slice(room));
+    } catch(err){
+      console.error(err);
+      showToast('Could not load ' + f.name, 'error');
+    }
+    if(index % 4 === 3) await new Promise(resolve => setTimeout(resolve, 0));
   }
-  renderFileList2();
-  render2();
-  fileInput2.value = '';
+  renderList();
+  render();
+  if(input) input.value = '';
+}
+
+async function handleFiles2(fileList){
+  await importStandardPageFiles(fileList, state2, renderFileList2, render2, fileInput2);
 }
 
 function renderFileList2(){
@@ -6050,13 +6159,7 @@ dropZone3.addEventListener('drop', e => handleFiles3(e.dataTransfer.files));
 fileInput3.addEventListener('change', e => handleFiles3(e.target.files));
 
 async function handleFiles3(fileList){
-  for(const f of Array.from(fileList)){
-    try { state3.files.push(...await processFile(f)); }
-    catch(err){ console.error(err); showToast('Could not load ' + f.name, 'error'); }
-  }
-  renderFileList3();
-  render3();
-  fileInput3.value = '';
+  await importStandardPageFiles(fileList, state3, renderFileList3, render3, fileInput3);
 }
 function renderFileList3(){
   $('#fileList3').empty();
@@ -6088,13 +6191,7 @@ dropZone4.addEventListener('drop', e => handleFiles4(e.dataTransfer.files));
 fileInput4.addEventListener('change', e => handleFiles4(e.target.files));
 
 async function handleFiles4(fileList){
-  for(const f of Array.from(fileList)){
-    try { state4.files.push(...await processFile(f)); }
-    catch(err){ console.error(err); showToast('Could not load ' + f.name, 'error'); }
-  }
-  renderFileList4();
-  render4();
-  fileInput4.value = '';
+  await importStandardPageFiles(fileList, state4, renderFileList4, render4, fileInput4);
 }
 function renderFileList4(){
   $('#fileList4').empty();
@@ -6138,7 +6235,7 @@ async function handleFiles5(fileList){
       const rots = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5];
       state5.photos.push({
         id: 'p5_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-        dataUrl, name, caption,
+        dataUrl, objectUrl: dataUrl, name, caption,
         rot: rots[Math.floor(Math.random()*rots.length)]
       });
       }
@@ -6181,15 +6278,19 @@ $(document).on('click', '.file-item .rm', function(){
   const $item = $(this).closest('.file-item');
   $item.fadeOut(180, () => {
     if(pg == 1){
+      releaseImportedAsset(state.files.find(f => f.id === id));
       state.files = state.files.filter(f => f.id !== id);
       renderFileList1(); render();
     } else if(pg == 2){
+      releaseImportedAsset(state2.files.find(f => f.id === id));
       state2.files = state2.files.filter(f => f.id !== id);
       renderFileList2(); render2();
     } else if(pg == 3){
+      releaseImportedAsset(state3.files.find(f => f.id === id));
       state3.files = state3.files.filter(f => f.id !== id);
       renderFileList3(); render3();
     } else if(pg == 4){
+      releaseImportedAsset(state4.files.find(f => f.id === id));
       state4.files = state4.files.filter(f => f.id !== id);
       renderFileList4(); render4();
     }
@@ -6351,6 +6452,7 @@ const canvas = document.getElementById('sheetCanvas');
 const ctx = canvas.getContext('2d');
 
 function render(){
+  const previewVersion = ++legacyPreviewVersions[1];
   const lay = computeLayout();
   // Update stats
   document.getElementById('statCards').textContent = lay.total;
@@ -6418,7 +6520,9 @@ function render(){
       ctx.fillText((i+1).toString(), x + w/2, y + h/2);
     });
   } else {
-    Promise.all(state.files.map(f => loadImg(f.dataUrl))).then(imgs => {
+    const previewFiles = visiblePreviewFiles(state.files, lay.slots.length, state.layoutMode);
+    Promise.all(previewFiles.map(loadImportedPreview)).then(imgs => {
+      if(previewVersion !== legacyPreviewVersions[1]) return;
       lay.slots.forEach((s, i) => {
         // Multi-up cycles; Gang-up shows ALL slots filled with the FIRST file (preview = sheet 1)
         const idx = state.layoutMode === 'single' ? 0 : (i % imgs.length);
@@ -6431,15 +6535,15 @@ function render(){
         ctx.strokeRect(x+0.3, y+0.3, w-0.6, h-0.6);
       });
       // Gang-up multi-file indicator
-      if(state.layoutMode === 'single' && imgs.length > 1){
+      if(state.layoutMode === 'single' && state.files.length > 1){
         ctx.save();
         ctx.fillStyle = 'rgba(212, 175, 55, 0.9)';
         ctx.font = '700 13px JetBrains Mono, monospace';
         ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-        ctx.fillText('Sheet 1 of ' + imgs.length, cw - 12, ch - 10);
+        ctx.fillText('Sheet 1 of ' + state.files.length, cw - 12, ch - 10);
         ctx.restore();
       }
-    });
+    }).catch(err => console.error('Preview failed', err));
   }
 }
 
@@ -6448,6 +6552,7 @@ const canvas2 = document.getElementById('sheetCanvas2');
 const ctx2 = canvas2.getContext('2d');
 
 function render2(){
+  const previewVersion = ++legacyPreviewVersions[2];
   const lay = computeLayout2();
   // Update stats
   $('#statCards2').text(lay.total);
@@ -6525,7 +6630,9 @@ function render2(){
       ctx2.fillText((i+1).toString(), x + w/2, y + h/2);
     });
   } else {
-    Promise.all(state2.files.map(f => loadImg(f.dataUrl))).then(imgs => {
+    const previewFiles = visiblePreviewFiles(state2.files, lay.slots.length, state2.layoutMode);
+    Promise.all(previewFiles.map(loadImportedPreview)).then(imgs => {
+      if(previewVersion !== legacyPreviewVersions[2]) return;
       lay.slots.forEach((s, i) => {
         const idx = state2.layoutMode === 'single' ? 0 : (i % imgs.length);
         const img = imgs[idx];
@@ -6536,15 +6643,15 @@ function render2(){
         ctx2.lineWidth = s.block === 'B' ? 0.9 : 0.5;
         ctx2.strokeRect(x+0.35, y+0.35, w-0.7, h-0.7);
       });
-      if(state2.layoutMode === 'single' && imgs.length > 1){
+      if(state2.layoutMode === 'single' && state2.files.length > 1){
         ctx2.save();
         ctx2.fillStyle = 'rgba(212, 175, 55, 0.9)';
         ctx2.font = '700 13px JetBrains Mono, monospace';
         ctx2.textAlign = 'right'; ctx2.textBaseline = 'bottom';
-        ctx2.fillText('Sheet 1 of ' + imgs.length, cw - 12, ch - 10);
+        ctx2.fillText('Sheet 1 of ' + state2.files.length, cw - 12, ch - 10);
         ctx2.restore();
       }
-    });
+    }).catch(err => console.error('Preview failed', err));
   }
 }
 
@@ -6595,6 +6702,7 @@ const canvas3 = document.getElementById('sheetCanvas3');
 const ctx3 = canvas3.getContext('2d');
 
 function render3(){
+  const previewVersion = ++legacyPreviewVersions[3];
   const lay = computeLayout3();
   $('#statCards3').text(lay.total);
   $('#statGrid3').text(lay.cols + '×' + lay.rows);
@@ -6641,7 +6749,9 @@ function render3(){
       ctx3.fillText((i+1).toString(), x+w/2, y+h/2);
     });
   } else {
-    Promise.all(state3.files.map(f => loadImg(f.dataUrl))).then(imgs => {
+    const previewFiles = visiblePreviewFiles(state3.files, lay.slots.length, state3.layoutMode);
+    Promise.all(previewFiles.map(loadImportedPreview)).then(imgs => {
+      if(previewVersion !== legacyPreviewVersions[3]) return;
       lay.slots.forEach((s, i) => {
         const idx = state3.layoutMode === 'single' ? 0 : (i % imgs.length);
         const img = imgs[idx];
@@ -6658,15 +6768,15 @@ function render3(){
           drawImageFit(ctx3, img, inner.x, inner.y, inner.w, inner.h, state3.fitMode);
         }
       });
-      if(state3.layoutMode === 'single' && imgs.length > 1){
+      if(state3.layoutMode === 'single' && state3.files.length > 1){
         ctx3.save();
         ctx3.fillStyle = 'rgba(212, 175, 55, 0.9)';
         ctx3.font = '700 13px JetBrains Mono, monospace';
         ctx3.textAlign = 'right'; ctx3.textBaseline = 'bottom';
-        ctx3.fillText('Sheet 1 of ' + imgs.length, cw - 12, ch - 10);
+        ctx3.fillText('Sheet 1 of ' + state3.files.length, cw - 12, ch - 10);
         ctx3.restore();
       }
-    });
+    }).catch(err => console.error('Preview failed', err));
   }
 }
 
@@ -6717,6 +6827,7 @@ const canvas4 = document.getElementById('sheetCanvas4');
 const ctx4 = canvas4.getContext('2d');
 
 function render4(){
+  const previewVersion = ++legacyPreviewVersions[4];
   const lay = computeLayout4();
   $('#statCards4').text(lay.total);
   $('#statGrid4').text(lay.cols + '×' + lay.rows);
@@ -6762,7 +6873,9 @@ function render4(){
       ctx4.fillText((i+1).toString(), x+w/2, y+h/2);
     });
   } else {
-    Promise.all(state4.files.map(f => loadImg(f.dataUrl))).then(imgs => {
+    const previewFiles = visiblePreviewFiles(state4.files, lay.slots.length, state4.layoutMode);
+    Promise.all(previewFiles.map(loadImportedPreview)).then(imgs => {
+      if(previewVersion !== legacyPreviewVersions[4]) return;
       lay.slots.forEach((s, i) => {
         const idx = state4.layoutMode === 'single' ? 0 : (i % imgs.length);
         const img = imgs[idx];
@@ -6779,15 +6892,15 @@ function render4(){
           drawImageFit(ctx4, img, inner.x, inner.y, inner.w, inner.h, state4.fitMode);
         }
       });
-      if(state4.layoutMode === 'single' && imgs.length > 1){
+      if(state4.layoutMode === 'single' && state4.files.length > 1){
         ctx4.save();
         ctx4.fillStyle = 'rgba(212, 175, 55, 0.9)';
         ctx4.font = '700 13px JetBrains Mono, monospace';
         ctx4.textAlign = 'right'; ctx4.textBaseline = 'bottom';
-        ctx4.fillText('Sheet 1 of ' + imgs.length, cw - 12, ch - 10);
+        ctx4.fillText('Sheet 1 of ' + state4.files.length, cw - 12, ch - 10);
         ctx4.restore();
       }
-    });
+    }).catch(err => console.error('Preview failed', err));
   }
 }
 
@@ -7012,6 +7125,7 @@ function renderPolaroidEditGrid(){
     });
     $card.find('.pol-remove').on('click', function(e){
       e.stopPropagation();
+      releaseImportedAsset(state5.photos[idx]);
       state5.photos.splice(idx, 1);
       $('#exportBtn5').prop('disabled', state5.photos.length === 0);
       render5();
@@ -9772,33 +9886,33 @@ $('#p9CustomSheetW,#p9CustomSheetH').on('input change', function(){
   state9.customSheetH_mm = Math.max(10, parseFloat($('#p9CustomSheetH').val()) || 297);
   SHEET_DIMS_9.custom.w_mm = state9.customSheetW_mm;
   SHEET_DIMS_9.custom.h_mm = state9.customSheetH_mm;
-  if(state9.sheet === 'custom') render9();
+  if(state9.sheet === 'custom') p9ScheduleRender();
 });
 
 // Custom gap input handlers
 $('#p9GapCol').on('input', function(){
   state9.gapCol_mm = Math.max(0, parseFloat(this.value) || 0);
-  render9();
+  p9ScheduleRender();
 });
 $('#p9GapRow').on('input', function(){
   state9.gapRow_mm = Math.max(0, parseFloat(this.value) || 0);
-  render9();
+  p9ScheduleRender();
 });
 
 // Single W/H input handlers (always store in mm, convert on input)
 $('#p9SingleW').on('input', function(){
   const val = parseFloat(this.value) || 0;
   state9.singleW_mm = state9.units === 'in' ? val * 25.4 : val;
-  render9();
+  p9ScheduleRender();
 });
 $('#p9SingleH').on('input', function(){
   const val = parseFloat(this.value) || 0;
   state9.singleH_mm = state9.units === 'in' ? val * 25.4 : val;
-  render9();
+  p9ScheduleRender();
 });
 $('#imgScale9').on('input', function(){
   state9.imgScale = Math.max(10, Math.min(200, parseFloat(this.value) || 100));
-  render9();
+  p9ScheduleRender();
 });
 
 // ====================  PAGE 9 TEXT OVERLAY  ====================
@@ -9835,7 +9949,7 @@ $('#p9ContentScale').on('input', function(){
   }
 });
 
-$('#p9GenerateLabels').on('click', function(){
+$('#p9GenerateLabels').on('click', async function(){
   const raw = $('#p9TextLabels').val();
   if(!raw.trim()){ showToast('Enter label text', 'error'); return; }
 
@@ -9929,16 +10043,17 @@ $('#p9GenerateLabels').on('click', function(){
   });
 
   // Build one file entry from this canvas
-  const dataUrl = off.toDataURL('image/png');
-  const img = new Image();
-  img.src = dataUrl;
+  const blob = await canvasToBlobAsync(off, 'image/png');
+  const sourceUrl = makeObjectUrl(blob);
   const stem = labelLines[0].replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'label';
 
+  p9ReleaseItems(state9.files);
   state9.files = [{
     id: 'p9lbl_' + Date.now(),
     name: stem + '.png',
     nameStem: stem,
-    image: img,
+    sourceUrl, objectUrl:sourceUrl, sourceBlob:blob, mime:'image/png',
+    pixelW:off.width, pixelH:off.height,
     customW_mm: state9.singleW_mm,
     customH_mm: state9.singleH_mm
   }];
@@ -9985,7 +10100,7 @@ $('#p9PageBg').on('input', function(){
   state9.pageBg = $(this).val();
   state9.pageBgEnabled = true;
   $('#p9PageBgVal').text(state9.pageBg);
-  render9();
+  p9ScheduleRender();
 });
 $('#p9PageBgClear').on('click', function(){
   state9.pageBgEnabled = !state9.pageBgEnabled;
@@ -10004,7 +10119,7 @@ $(document).on('click', '#page9 .pill[data-p9-corner]', function(){
 $('#p9CornerRadius').on('input', function(){
   state9.cornerRadius_mm = parseFloat($(this).val());
   $('#p9CornerRadiusVal').text(state9.cornerRadius_mm + 'mm');
-  render9();
+  p9ScheduleRender();
 });
 
 $(document).on('click', '#page9 .pill[data-p9-border]', function(){
@@ -10017,12 +10132,12 @@ $(document).on('click', '#page9 .pill[data-p9-border]', function(){
 $('#p9BorderColor').on('input', function(){
   state9.borderColor = $(this).val();
   $('#p9BorderColorVal').text(state9.borderColor);
-  render9();
+  p9ScheduleRender();
 });
 $('#p9BorderWidth').on('input', function(){
   state9.borderWidth_mm = parseFloat($(this).val());
   $('#p9BorderWidthVal').text(state9.borderWidth_mm + 'mm');
-  render9();
+  p9ScheduleRender();
 });
 
 function toggleTextOverlay9(){
@@ -10061,12 +10176,12 @@ $(document).on('click', '#page9 .pill[data-p9-textcolor]', function(){
 
 $('#p9TextSize').on('input', function(){
   state9.textSizePt = Math.max(4, Math.min(36, parseFloat(this.value) || 8));
-  render9();
+  p9ScheduleRender();
 });
 
 $('#p9CustomTextInput').on('input', function(){
   state9.textCustom = this.value;
-  render9();
+  p9ScheduleRender(120);
 });
 
 // Helper: get display text for a slot
@@ -10148,6 +10263,69 @@ function updateP9SingleInputs(){
 // ====================  PAGE 9 FILE HANDLING  ====================
 const dropZone9 = document.getElementById('dropZone9');
 const fileInput9 = document.getElementById('fileInput9');
+const P9_PREVIEW_CACHE_SIZE = 32;
+const p9PreviewCache = new Map();
+let p9FileListPage = 0;
+let p9RenderVersion = 0;
+let p9RenderTimer = 0;
+
+function p9ScheduleRender(delay = 80){
+  clearTimeout(p9RenderTimer);
+  p9RenderTimer = setTimeout(render9, delay);
+}
+
+function p9ReleaseItem(item){
+  if(!item) return;
+  p9PreviewCache.delete(item.id);
+  if(item.objectUrl){
+    URL.revokeObjectURL(item.objectUrl);
+    item.objectUrl = '';
+  }
+}
+
+function p9ReleaseItems(items){
+  (items || []).forEach(p9ReleaseItem);
+}
+
+async function p9ProbeImage(sourceUrl){
+  const img = await loadImg(sourceUrl);
+  const size = {width:img.naturalWidth || img.width, height:img.naturalHeight || img.height};
+  img.src = '';
+  return size;
+}
+
+function p9LoadImage(item){
+  const existing = p9PreviewCache.get(item.id);
+  if(existing){
+    p9PreviewCache.delete(item.id);
+    p9PreviewCache.set(item.id, existing);
+    return existing;
+  }
+  const pending = loadImg(item.sourceUrl || item.image?.src).catch(err => {
+    p9PreviewCache.delete(item.id);
+    throw err;
+  });
+  p9PreviewCache.set(item.id, pending);
+  while(p9PreviewCache.size > P9_PREVIEW_CACHE_SIZE){
+    p9PreviewCache.delete(p9PreviewCache.keys().next().value);
+  }
+  return pending;
+}
+
+async function p9SourceBytes(item){
+  if(item.sourceFile) return new Uint8Array(await item.sourceFile.arrayBuffer());
+  if(item.sourceBlob) return new Uint8Array(await item.sourceBlob.arrayBuffer());
+  const response = await fetch(item.sourceUrl || item.image?.src);
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+function p9EffectiveDpi(item){
+  const widthMm = state9.sizeMode === 'per' ? item.customW_mm : state9.singleW_mm;
+  const heightMm = state9.sizeMode === 'per' ? item.customH_mm : state9.singleH_mm;
+  const x = (item.pixelW || 0) / (widthMm / 25.4);
+  const y = (item.pixelH || 0) / (heightMm / 25.4);
+  return Math.max(0, Math.floor(Math.min(x, y)));
+}
 ['dragenter', 'dragover'].forEach(ev => dropZone9.addEventListener(ev, e => {
   e.preventDefault(); dropZone9.classList.add('drag');
 }));
@@ -10158,18 +10336,26 @@ dropZone9.addEventListener('drop', e => handleFiles9(e.dataTransfer.files));
 fileInput9.addEventListener('change', e => handleFiles9(e.target.files));
 
 async function handleFiles9(fileList){
-  const arr = Array.from(fileList || []);
+  const arr = Array.from(fileList || []).slice(0, MAX_BATCH_FILES);
   if(arr.length === 0) return;
   $('#exportBtn9').prop('disabled', true);
-  for(const file of arr){
+  for(let index = 0; index < arr.length; index++){
+    const file = arr[index];
+    if(window.printsmenImport?.cancelled) break;
+    importProgress('File ' + (index + 1) + ' of ' + arr.length + ': ' + file.name);
     try {
       const items = await processCustomSizeFile(file);
-      if(items && items.length) items.forEach(item => state9.files.push(item));
+      const available = Math.max(0, MAX_BATCH_FILES - state9.files.length);
+      state9.files.push(...items.slice(0, available));
+      p9ReleaseItems(items.slice(available));
+      if(state9.files.length >= MAX_BATCH_FILES) break;
     } catch(err){
       console.error(err);
       showToast('Could not load ' + file.name + ': ' + err.message, 'error');
     }
+    if(index % 5 === 4) await new Promise(resolve => setTimeout(resolve, 0));
   }
+  p9FileListPage = Math.max(0, Math.ceil(state9.files.length / FILE_LIST_PAGE_SIZE) - 1);
   renderFileList9();
   $('#exportBtn9').prop('disabled', state9.files.length === 0);
   fileInput9.value = '';
@@ -10177,39 +10363,55 @@ async function handleFiles9(fileList){
 }
 
 async function processCustomSizeFile(file){
-  if(file.type === 'application/pdf'){
+  if(file.type === 'application/pdf' || /\.pdf$/i.test(file.name)){
     const buf = await file.arrayBuffer();
     const pdf = await printsmenOpenPdf({data: new Uint8Array(buf)});
-    const totalPages = pdf.numPages;
-    const nameStem = file.name.replace(/\.pdf$/i, '');
-    const items = [];
-    showToast('Loading ' + totalPages + ' page' + (totalPages===1?'':'s') + ' from ' + file.name + '…', 'info');
-    for(let pn = 1; pn <= totalPages; pn++){
-      const page = await pdf.getPage(pn);
-      const vp = page.getViewport({scale: 3});
-      const off = document.createElement('canvas');
-      off.width = vp.width; off.height = vp.height;
-      await page.render({canvasContext: off.getContext('2d'), viewport: vp}).promise;
-      const img = await loadImg(off.toDataURL('image/jpeg', 0.95));
-      const pageLabel = totalPages > 1 ? (nameStem + ' — p' + pn) : nameStem;
-      items.push({
-        id: 'p9_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-        name: totalPages > 1 ? (file.name + ' [p' + pn + '/' + totalPages + ']') : file.name,
-        nameStem: pageLabel,
-        image: img,
-        customW_mm: state9.singleW_mm,
-        customH_mm: state9.singleH_mm
-      });
+    try {
+      const totalPages = pdf.numPages;
+      const nameStem = file.name.replace(/\.pdf$/i, '');
+      const items = [];
+      showToast('Loading ' + totalPages + ' page' + (totalPages===1?'':'s') + ' from ' + file.name + '…', 'info');
+      for(let pn = 1; pn <= totalPages; pn++){
+        if(window.printsmenImport?.cancelled) break;
+        importProgress(file.name + ': PDF page ' + pn + ' of ' + totalPages);
+        const page = await pdf.getPage(pn);
+        const vp = page.getViewport({scale: 2});
+        const off = document.createElement('canvas');
+        off.width = Math.ceil(vp.width); off.height = Math.ceil(vp.height);
+        await page.render({canvasContext: off.getContext('2d'), viewport: vp}).promise;
+        const blob = await canvasToBlobAsync(off, 'image/jpeg', 0.94);
+        const sourceUrl = makeObjectUrl(blob);
+        const pageLabel = totalPages > 1 ? (nameStem + ' - p' + pn) : nameStem;
+        items.push({
+          id: 'p9_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+          name: totalPages > 1 ? (file.name + ' [p' + pn + '/' + totalPages + ']') : file.name,
+          nameStem: pageLabel,
+          sourceUrl, objectUrl:sourceUrl, sourceBlob:blob, mime:'image/jpeg',
+          pixelW:off.width, pixelH:off.height,
+          customW_mm: state9.singleW_mm,
+          customH_mm: state9.singleH_mm
+        });
+        off.width = off.height = 0;
+        page.cleanup();
+        if(items.length >= MAX_BATCH_FILES) break;
+        if(pn % 3 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+      }
+      return items;
+    } finally {
+      await pdf.destroy();
     }
-    return items;
-  } else if(file.type.startsWith('image/')){
-    const dataUrl = await fileToDataURL(file);
-    const img = await loadImg(dataUrl);
+  } else if(/^image\/(png|jpeg)$/i.test(file.type) || /\.(png|jpe?g)$/i.test(file.name)){
+    const sourceUrl = makeObjectUrl(file);
+    let size;
+    try { size = await p9ProbeImage(sourceUrl); }
+    catch(err){ URL.revokeObjectURL(sourceUrl); throw err; }
     return [{
       id: 'p9_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
       name: file.name,
       nameStem: file.name.replace(/\.(png|jpe?g|gif|webp|bmp)$/i, ''),
-      image: img,
+      sourceUrl, objectUrl:sourceUrl, sourceFile:file,
+      mime:/png/i.test(file.type) || /\.png$/i.test(file.name) ? 'image/png' : 'image/jpeg',
+      pixelW:size.width, pixelH:size.height,
       customW_mm: state9.singleW_mm,
       customH_mm: state9.singleH_mm
     }];
@@ -10226,11 +10428,16 @@ function renderFileList9(){
     return;
   }
   $('#fileCount9').text(state9.files.length + ' file' + (state9.files.length===1?'':'s'));
-  state9.files.forEach((item, idx) => {
+  const pageCount = Math.max(1, Math.ceil(state9.files.length / FILE_LIST_PAGE_SIZE));
+  p9FileListPage = Math.min(Math.max(0, p9FileListPage), pageCount - 1);
+  const start = p9FileListPage * FILE_LIST_PAGE_SIZE;
+  state9.files.slice(start, start + FILE_LIST_PAGE_SIZE).forEach(item => {
     const wMm = item.customW_mm.toFixed(1);
     const wIn = (item.customW_mm / 25.4).toFixed(2);
     const hMm = item.customH_mm.toFixed(1);
     const hIn = (item.customH_mm / 25.4).toFixed(2);
+    const effectiveDpi = p9EffectiveDpi(item);
+    const qualityClass = effectiveDpi >= (OPS?.state?.dpi || 300) ? 'good' : effectiveDpi >= (OPS?.state?.dpi || 300) * 0.72 ? 'warn' : 'low';
     const inputStyle = "width:62px;padding:4px 6px;background:rgba(0,0,0,0.25);border:1px solid var(--rule-soft);color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:11px;border-radius:3px;";
     const labelStyle = "color:var(--muted);font-size:9px;align-self:center;font-family:'JetBrains Mono',monospace;";
     const perFileInputs = (state9.sizeMode === 'per') ? `
@@ -10251,10 +10458,10 @@ function renderFileList9(){
     ` : '';
     const $row = $(`
       <div class="file-item" data-id="${item.id}">
-        <img class="thumb" src="${item.image.src}" alt="">
+        <img class="thumb" src="${item.sourceUrl || item.image?.src}" loading="lazy" alt="">
         <div class="info" style="flex:1;">
-          <div class="name">${item.name}</div>
-          <div class="meta">${item.image.width}×${item.image.height}px</div>
+          <div class="name">${p15Escape(item.name)}</div>
+          <div class="meta">${item.pixelW || item.image?.width || 0}×${item.pixelH || item.image?.height || 0}px · <span class="source-dpi ${qualityClass}">${effectiveDpi} effective DPI</span></div>
           ${perFileInputs}
         </div>
         <button class="rm" data-id="${item.id}">×</button>
@@ -10262,7 +10469,16 @@ function renderFileList9(){
     `);
     $list.append($row);
   });
+  if(pageCount > 1){
+    $list.append(`<div class="batch-file-pager"><button type="button" data-p9-page="prev" ${p9FileListPage === 0 ? 'disabled' : ''}>Previous</button><span>${start + 1}-${Math.min(start + FILE_LIST_PAGE_SIZE, state9.files.length)} of ${state9.files.length}</span><button type="button" data-p9-page="next" ${p9FileListPage >= pageCount - 1 ? 'disabled' : ''}>Next</button></div>`);
+  }
 }
+
+$(document).on('click', '#fileList9 [data-p9-page]', function(e){
+  e.preventDefault(); e.stopImmediatePropagation();
+  p9FileListPage += $(this).data('p9-page') === 'next' ? 1 : -1;
+  renderFileList9();
+});
 
 // Per-file W/H input handlers — 4 inputs per file (W-in, W-mm, H-in, H-mm).
 // Editing one auto-updates the matching counterpart.
@@ -10287,15 +10503,16 @@ $(document).on('input', '#page9 .p9-per-w-in, #page9 .p9-per-w-mm, #page9 .p9-pe
     item.customH_mm = val;
     $row.find('.p9-per-h-in').val((val / 25.4).toFixed(2));
   }
-  render9();
+  p9ScheduleRender();
 });
 
 // Per-file remove handler
 $(document).on('click', '#page9 .file-item .rm', function(e){
-  e.preventDefault(); e.stopPropagation();
+  e.preventDefault(); e.stopImmediatePropagation();
   const id = $(this).data('id');
   const $item = $(this).closest('.file-item');
   $item.fadeOut(180, () => {
+    p9ReleaseItem(state9.files.find(it => it.id === id));
     state9.files = state9.files.filter(it => it.id !== id);
     renderFileList9();
     $('#exportBtn9').prop('disabled', state9.files.length === 0);
@@ -10519,7 +10736,8 @@ function computeUniformGrid(sheetW, sheetH, itemW, itemH, gapCol, gapRow, autoRo
 const customCanvas = document.getElementById('customCanvas');
 const customCtx = customCanvas.getContext('2d');
 
-function render9(){
+async function render9(){
+  const renderVersion = ++p9RenderVersion;
   const lay = computeLayout9();
   // Update stats
   $('#statItemsPerSheet9').text(lay.itemsThisSheet);
@@ -10588,6 +10806,7 @@ function render9(){
     ? state9.cornerRadius_mm * mmToPx : 0;
 
   // Draw each slot on sheet 0
+  const previewSlotLimit = 120;
   for(let i = 0; i < sheet0.slots.length; i++){
     const s = sheet0.slots[i];
     const x = s.x * mmToPx;
@@ -10598,7 +10817,15 @@ function render9(){
     // Each slot now carries its own fileIdx — no more cycling logic in render
     const fileIdx = s.fileIdx;
     if(fileIdx >= 0 && state9.files[fileIdx]){
-      const img = state9.files[fileIdx].image;
+      if(i >= previewSlotLimit){
+        customCtx.fillStyle = 'rgba(127, 0, 255, 0.07)';
+        customCtx.fillRect(x, y, w, h);
+        continue;
+      }
+      let img;
+      try { img = await p9LoadImage(state9.files[fileIdx]); }
+      catch(err){ console.error('Custom Size preview failed', err); continue; }
+      if(renderVersion !== p9RenderVersion) return;
 
       // Clip to rounded rect so the image respects corner style
       customCtx.save();
@@ -10658,6 +10885,17 @@ function render9(){
     }
   }
 
+  if(sheet0.slots.length > previewSlotLimit){
+    customCtx.save();
+    customCtx.fillStyle = 'rgba(43,10,79,.92)';
+    customCtx.fillRect(8, 8, Math.min(310, cw - 16), 25);
+    customCtx.fillStyle = '#ffe4a0';
+    customCtx.font = '600 11px JetBrains Mono, monospace';
+    customCtx.textAlign = 'left'; customCtx.textBaseline = 'middle';
+    customCtx.fillText('Fast preview: first ' + previewSlotLimit + ' items · export includes all', 16, 20.5);
+    customCtx.restore();
+  }
+
   // Crop marks
   if(state9.cropMarks === 'on'){
     drawCropMarksOnCanvas(customCtx, sheet0.slots, mmToPx, '#2b0a4f');
@@ -10683,22 +10921,34 @@ async function exportCustomSizePDF(){
   const $btn = $('#exportBtn9');
   $btn.prop('disabled', true).html('<span class="spinner"></span> Building PDF…');
   try {
+    const production = window.printsmenProduction || await import('../production-runtime.mjs');
     const { PDFDocument, rgb, degrees } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const MM_PT = 72 / 25.4;
     const cropColor = rgb(0.16, 0.04, 0.31);
 
-    // Pre-embed all images
-    const embedded = [];
-    for(const f of state9.files){
-      const dataUrl = f.image.src;
-      const bytes = dataUrlToUint8(dataUrl);
-      const isPng = dataUrl.startsWith('data:image/png');
-      const embed = isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-      embedded.push(embed);
+    // Embed only when a sheet needs an item. This keeps a 500-file job responsive
+    // and avoids decoding every source before the first output page is built.
+    const embedded = new Map();
+    async function embeddedAt(fileIdx){
+      if(embedded.has(fileIdx)) return embedded.get(fileIdx);
+      const item = state9.files[fileIdx];
+      const bytes = await p9SourceBytes(item);
+      const embed = item.mime === 'image/png'
+        ? await pdfDoc.embedPng(bytes)
+        : await pdfDoc.embedJpg(bytes);
+      embedded.set(fileIdx, embed);
+      return embed;
     }
 
     const lay = computeLayout9();
+    const exportDpi = production.normalizeDpi(OPS.state.dpi || 300);
+    const jobEstimate = production.estimateRasterJob({
+      widthMm:lay.sheetW_mm, heightMm:lay.sheetH_mm, dpi:exportDpi,
+      sheets:lay.numSheets, buffers:state9.textOverlay || state9.borderEnabled || state9.cornerStyle === 'round' ? 3 : 1
+    });
+    if(!jobEstimate.safe) throw new Error('This sheet and DPI exceed the safe production limit. Reduce the sheet size or DPI.');
+    $btn.html('<span class="spinner"></span> ' + jobEstimate.width + '×' + jobEstimate.height + ' px · peak ' + production.formatBytes(jobEstimate.peakBytes));
     const sheetW_pt = lay.sheetW_mm * MM_PT;
     const sheetH_pt = lay.sheetH_mm * MM_PT;
 
@@ -10781,12 +11031,12 @@ async function exportCustomSizePDF(){
 
       // If text overlay is on, render each slot to an offscreen canvas with text,
       // then embed that canvas image in the PDF instead of the raw image.
-      const DPI = 300;
+      const DPI = exportDpi;
       const MM_PX = DPI / 25.4;
 
       for(let slotI = 0; slotI < layoutSheet.slots.length; slotI++){
         const slot = layoutSheet.slots[slotI];
-        if(slot.fileIdx < 0 || !embedded[slot.fileIdx]) continue;
+        if(slot.fileIdx < 0 || !state9.files[slot.fileIdx]) continue;
 
         const slotX_pt = slot.x * MM_PT;
         const slotY_pt = sheetH_pt - (slot.y + slot.h) * MM_PT;
@@ -10835,8 +11085,14 @@ async function exportCustomSizePDF(){
             roundedPath(offCtx, 0, 0, slotW_px, slotH_px, cornerR);
             offCtx.clip();
           }
-          const srcImg = state9.files[slot.fileIdx].image;
-          drawImageFit(offCtx, srcImg, 0, 0, slotW_px, slotH_px, state9.fitMode, state9.imgScale);
+          const srcImg = await p9LoadImage(state9.files[slot.fileIdx]);
+          if(slot.rotated){
+            offCtx.translate(slotW_px / 2, slotH_px / 2);
+            offCtx.rotate(Math.PI / 2);
+            drawImageFit(offCtx, srcImg, -slotH_px / 2, -slotW_px / 2, slotH_px, slotW_px, state9.fitMode, state9.imgScale);
+          } else {
+            drawImageFit(offCtx, srcImg, 0, 0, slotW_px, slotH_px, state9.fitMode, state9.imgScale);
+          }
           offCtx.restore();
 
           // Border
@@ -10858,8 +11114,8 @@ async function exportCustomSizePDF(){
 
           // Preserve transparency so the sheet background remains visible around
           // contained/scaled images and rounded item corners.
-          const compositeDataUrl = offC.toDataURL('image/png');
-          const compositeBytes = dataUrlToUint8(compositeDataUrl);
+          const compositeBlob = await canvasToBlobAsync(offC, 'image/png');
+          const compositeBytes = new Uint8Array(await compositeBlob.arrayBuffer());
           const compositeEmbed = await pdfDoc.embedPng(compositeBytes);
 
           const px = slot.x * MM_PT;
@@ -10867,21 +11123,26 @@ async function exportCustomSizePDF(){
           const ph = slot.h * MM_PT;
           const py_pt = (lay.sheetH_mm - (slot.y + slot.h)) * MM_PT;
           page.drawImage(compositeEmbed, {x: px, y: py_pt, width: pw, height: ph});
+          offC.width = offC.height = 0;
         } else {
-          drawSlot(page, embedded[slot.fileIdx], slot);
+          const sourceEmbed = await embeddedAt(slot.fileIdx);
+          drawSlot(page, sourceEmbed, slot);
         }
+        if(slotI % 10 === 9) await new Promise(resolve => setTimeout(resolve, 0));
       }
 
       if(state9.cropMarks === 'on'){
         drawCropMarksOnPdfPage(page, layoutSheet.slots, lay.sheetH_mm, MM_PT, cropColor);
       }
+      $btn.html('<span class="spinner"></span> Building sheet ' + (sIdx + 1) + ' of ' + lay.sheets.length + '…');
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
 
     pdfDoc.setTitle('PrintsMen — Option 9 — Custom Size · ' + state9.sheet + ' ' + state9.orient);
     pdfDoc.setSubject('Custom-size imposition · ' + lay.numSheets + ' sheet(s) · ' + lay.totalSlots + ' items total · ' + state9.layoutMode);
     pdfDoc.setProducer('PrintsMen Imposition Tool');
     pdfDoc.setCreator('PrintsMen v1.0');
-    pdfDoc.setKeywords(['custom-size', 'labels', 'photos', state9.sheet, state9.layoutMode, '300DPI']);
+    pdfDoc.setKeywords(['custom-size', 'labels', 'photos', state9.sheet, state9.layoutMode, exportDpi + 'DPI']);
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], {type: 'application/pdf'});
@@ -13464,7 +13725,7 @@ const OPS = {
 
   // -------- DPI --------
   setDpi(dpi){
-    const allowed = [300, 600, 1200];
+    const allowed = [90, 150, 200, 300, 360, 600];
     if(!allowed.includes(dpi)) return;
     OPS.state.dpi = dpi;
     $('#dpiOverlay .dpi-pill').each(function(){
@@ -13473,8 +13734,6 @@ const OPS = {
         $(this).addClass('active').css({
           background: 'rgba(212,175,55,0.25)', 'border-color': 'var(--gold)', color: 'var(--gold-bright)'
         });
-      } else if(parseInt($(this).attr('data-dpi'),10) === 2400){
-        // leave 2400 disabled-style alone
       } else {
         $(this).removeClass('active').css({
           background: 'rgba(0,0,0,0.3)', 'border-color': 'var(--rule-soft)', color: 'var(--muted)'
@@ -14573,6 +14832,7 @@ $('#exportBtn13').on('click', exportSpinePDF13);
 // ====================  RESET HANDLERS — all pages  ====================
 function resetState(num){
   if(num === 1){
+    releaseImportedAssets(state.files);
     state.files = []; state.cardSize='86x52'; state.cardOrient='landscape';
     state.sheetSize='12x18'; state.sheetOrient='landscape'; state.gap=1;
     state.bgMode='white'; state.bgColor='#f5f0e6'; state.fitMode='stretch'; state.layoutMode='multi';
@@ -14583,6 +14843,7 @@ function resetState(num){
     $('#page1 .pill[data-cardsize="86x52"], #page1 .pill[data-cardorient="landscape"], #page1 .pill[data-sheetsize="12x18"], #page1 .pill[data-sheetorient="landscape"], #page1 .pill[data-gap="1"], #page1 .pill[data-bgmode="white"], #page1 .pill[data-fitmode="stretch"], #page1 .pill[data-layoutmode="multi"]').addClass('active');
     render();
   } else if(num === 2){
+    releaseImportedAssets(state2.files);
     state2.files=[]; state2.cardSize='86x52'; state2.sheetOrient='landscape';
     state2.gap=1; state2.bgMode='white'; state2.bgColor='#f5f0e6'; state2.fitMode='stretch'; state2.layoutMode='multi';
     $('#fileList2').empty(); $('#fileCount2').text('0 files'); $('#exportBtn2').prop('disabled', true);
@@ -14592,6 +14853,7 @@ function resetState(num){
     $('#page2 .pill[data-p2-cardsize="86x52"], #page2 .pill[data-p2-sheetsize="13x19"], #page2 .pill[data-p2-sheetorient="landscape"], #page2 .pill[data-p2-gap="1"], #page2 .pill[data-p2-bgmode="white"], #page2 .pill[data-p2-fitmode="stretch"], #page2 .pill[data-p2-layoutmode="multi"]').addClass('active');
     render2();
   } else if(num === 3){
+    releaseImportedAssets(state3.files);
     state3.files=[]; state3.pageSize='a5'; state3.pageOrient='portrait';
     state3.sheetSize='12x18'; state3.sheetOrient='portrait';
     state3.gap=1; state3.bgMode='white'; state3.bgColor='#f5f0e6';
@@ -14603,6 +14865,7 @@ function resetState(num){
     $('#page3 .pill[data-p3-pagesize="a5"], #page3 .pill[data-p3-pageorient="portrait"], #page3 .pill[data-p3-sheetsize="12x18"], #page3 .pill[data-p3-sheetorient="portrait"], #page3 .pill[data-p3-gap="1"], #page3 .pill[data-p3-bgmode="white"], #page3 .pill[data-p3-fitmode="stretch"], #page3 .pill[data-p3-border="none"], #page3 .pill[data-p3-layoutmode="multi"]').addClass('active');
     render3();
   } else if(num === 4){
+    releaseImportedAssets(state4.files);
     state4.files=[]; state4.pageSize='a4'; state4.pageOrient='portrait';
     state4.sheetSize='12x18'; state4.sheetOrient='portrait';
     state4.gap=1; state4.bgMode='white'; state4.bgColor='#f5f0e6';
@@ -14614,7 +14877,7 @@ function resetState(num){
     $('#page4 .pill[data-p4-pagesize="a4"], #page4 .pill[data-p4-pageorient="portrait"], #page4 .pill[data-p4-sheetsize="12x18"], #page4 .pill[data-p4-sheetorient="portrait"], #page4 .pill[data-p4-gap="1"], #page4 .pill[data-p4-bgmode="white"], #page4 .pill[data-p4-fitmode="stretch"], #page4 .pill[data-p4-border="none"], #page4 .pill[data-p4-layoutmode="multi"]').addClass('active');
     render4();
   } else if(num === 5){
-    state5.photos=[]; state5.sheetSize='12x18'; state5.sheetOrient='landscape';
+    state5.photos.forEach(releaseImportedAsset); state5.photos=[]; state5.sheetSize='12x18'; state5.sheetOrient='landscape';
     state5.polSize='medium'; state5.capType='filename'; state5.globalCaption='';
     state5.matMode='#f5f0e8'; state5.matColorCustom='#f5f0e8';
     state5.sheetBgMode='white'; state5.sheetBgColor='#fdf6ec';
@@ -14669,6 +14932,7 @@ function resetState(num){
     $('#page8 .pill[data-p8-mode="threshold"], #page8 .pill[data-p8-papersize="a4"]').addClass('active');
     render8();
   } else if(num === 9){
+    p9ReleaseItems(state9.files);
     state9.files = [];
     state9.sizeMode = 'all'; state9.units = 'mm';
     state9.singleW_mm = 100; state9.singleH_mm = 50;

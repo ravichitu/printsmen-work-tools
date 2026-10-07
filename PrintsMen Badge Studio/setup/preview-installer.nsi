@@ -101,11 +101,15 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\PrintsMenBadgeStudioPreview" "UninstallString" '$\"$INSTDIR\Uninstall.exe$\"'
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\PrintsMenBadgeStudioPreview" "NoModify" 1
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\PrintsMenBadgeStudioPreview" "NoRepair" 1
-  CreateDirectory "$SMPROGRAMS\PrintsMen Badge Studio Preview"
-  CreateShortCut "$SMPROGRAMS\PrintsMen Badge Studio Preview\PrintsMen Studio.lnk" "$INSTDIR\Start Badge Studio.cmd" "" "$INSTDIR\runtime\node.exe"
-  CreateShortCut "$SMPROGRAMS\PrintsMen Badge Studio Preview\Update Manager.lnk" "$INSTDIR\Start Update Manager.cmd" "" "$INSTDIR\runtime\node.exe"
-  CreateShortCut "$SMPROGRAMS\PrintsMen Badge Studio Preview\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-  CreateShortCut "$DESKTOP\PrintsMen Badge Studio Preview.lnk" "$INSTDIR\Start Badge Studio.cmd" "" "$INSTDIR\runtime\node.exe"
+  Delete "$DESKTOP\PrintsMen Badge Studio Preview.lnk"
+  Delete "$SMPROGRAMS\PrintsMen Badge Studio Preview\PrintsMen Studio.lnk"
+  Delete "$SMPROGRAMS\PrintsMen Badge Studio Preview\Update Manager.lnk"
+  Delete "$SMPROGRAMS\PrintsMen Badge Studio Preview\Uninstall.lnk"
+  RMDir "$SMPROGRAMS\PrintsMen Badge Studio Preview"
+  CreateDirectory "$SMPROGRAMS\PrintsMen Customised Studio Preview"
+  CreateShortCut "$SMPROGRAMS\PrintsMen Customised Studio Preview\Customised Studio.lnk" "$INSTDIR\Start Customised Studio.cmd" "" "$INSTDIR\runtime\node.exe"
+  CreateShortCut "$SMPROGRAMS\PrintsMen Customised Studio Preview\Update Manager.lnk" "$INSTDIR\Start Update Manager.cmd" "" "$INSTDIR\runtime\node.exe"
+  CreateShortCut "$SMPROGRAMS\PrintsMen Customised Studio Preview\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
   CreateShortCut "$DESKTOP\PrintsMen Customised Studio Preview.lnk" "$INSTDIR\Start Customised Studio.cmd" "" "$INSTDIR\runtime\node.exe"
   ${EndIf}
 SectionEnd
@@ -135,6 +139,10 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\PrintsMen Badge Studio Preview\Update Manager.lnk"
   Delete "$SMPROGRAMS\PrintsMen Badge Studio Preview\Uninstall.lnk"
   RMDir "$SMPROGRAMS\PrintsMen Badge Studio Preview"
+  Delete "$SMPROGRAMS\PrintsMen Customised Studio Preview\Customised Studio.lnk"
+  Delete "$SMPROGRAMS\PrintsMen Customised Studio Preview\Update Manager.lnk"
+  Delete "$SMPROGRAMS\PrintsMen Customised Studio Preview\Uninstall.lnk"
+  RMDir "$SMPROGRAMS\PrintsMen Customised Studio Preview"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\PrintsMenBadgeStudioPreview"
   ${EndIf}
   Goto finished

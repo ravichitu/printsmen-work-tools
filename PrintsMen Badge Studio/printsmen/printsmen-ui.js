@@ -201,6 +201,7 @@
     cancel.onclick = () => { window.printsmenImport.cancelled = true; cancel.disabled = true; progress.textContent = 'Cancelling after the current rendering step...'; };
     let busy = false;
     const naming=import('../naming.js');
+    import('../production-runtime.mjs').then(runtime => { window.printsmenProduction = runtime; }).catch(console.error);
     const filenameSelector='.export-filename,input[id$="Filename"]';
     document.addEventListener('input',event=>{if(event.target.matches(filenameSelector))event.target.dataset.manualName='true';});
     const queuedImports = ['handleFiles1','handleFiles2','handleFiles3','handleFiles4','handleFiles5','handleFiles8','handleFiles9','p14HandleFiles','p15HandleFiles','p16HandleFiles','p17HandleFiles','p18HandleFiles','p19HandleFiles','p20HandleFiles','p21HandleFiles'];
@@ -210,7 +211,7 @@
       window[key] = async function(files) {
         if(busy) { info('Import in progress', 'Wait for this import to finish or cancel it before starting another.'); return; }
         const list = Array.from(files);
-        if(list.length > 30) { info('Import limit', 'Choose up to 30 files per batch.'); return; }
+        if(list.length > 500) { info('Import limit', 'Choose up to 500 files per batch.'); return; }
         const pageNumber=(key.match(/\d+/)||[])[0];
         const filename=document.getElementById('filename'+pageNumber)||document.getElementById('p'+pageNumber+'Filename');
         const manualName=filename?.dataset.manualName==='true'?filename.value:null;
@@ -220,12 +221,10 @@
         uploadStatus.hidden = false;
         cancel.disabled = false;
         try {
-          for(let i = 0; i < list.length; i++) {
-            if(window.printsmenImport.cancelled) break;
-            window.printsmenImport.report('File ' + (i + 1) + ' of ' + list.length + ': ' + list[i].name);
-            await original([list[i]]);
-            await new Promise(resolve => setTimeout(resolve, 0));
-          }
+          window.printsmenImport.report('Preparing ' + list.length + ' file' + (list.length === 1 ? '' : 's') + '...');
+          // Page handlers already process arrays sequentially. Calling them once avoids
+          // rebuilding the complete file list and canvas after every imported file.
+          await original(list);
           if(list.length&&filename&&!window.printsmenImport.cancelled){filename.value=manualName??(await naming).uploadName(list);filename.dispatchEvent(new Event('change',{bubbles:true}));}
         } finally { if(manualName!==null&&filename)filename.value=manualName;busy = false; uploadStatus.hidden = true; window.printsmenImport.cancelled = false; }
       };
