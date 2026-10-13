@@ -1,4 +1,4 @@
-import {readFile,mkdir,writeFile,rename,unlink,lstat,open} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,rename,unlink,lstat,open,realpath} from 'node:fs/promises';
 import {createHash,randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
@@ -106,7 +106,7 @@ export async function loadUpdateManager(root){
   let config={schema:1,channel:'preview',feedUrl:'',publicKey:'',checkIntervalHours:6};
   try{config=JSON.parse(await readFile(path.join(root,'updates-config.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
   let installed=false;
-  try{const marker=JSON.parse(await readFile(path.join(root,'.preview-installation.json'),'utf8'));installed=marker.product==='printsmen-badge-studio-preview'&&path.resolve(marker.root).toLowerCase()===path.resolve(root).toLowerCase();}catch{}
+  try{const marker=JSON.parse(await readFile(path.join(root,'.preview-installation.json'),'utf8'));installed=marker.product==='printsmen-badge-studio-preview'&&typeof marker.root==='string'&&path.isAbsolute(marker.root)&&(await realpath(marker.root)).toLowerCase()===(await realpath(root)).toLowerCase();}catch{}
   const id=createHash('sha256').update(path.resolve(root).toLowerCase()).digest('hex').slice(0,24);
   const cache=path.join(process.env.LOCALAPPDATA||root,'PrintsMen','UpdateCache',id);
   return new UpdateManager({root,config,version,installed,cache});

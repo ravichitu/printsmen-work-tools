@@ -5,7 +5,7 @@ import {mkdtemp,readFile,writeFile,mkdir,rm,access} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {UpdateManager} from '../updates/manager.mjs';
+import {UpdateManager,loadUpdateManager} from '../updates/manager.mjs';
 import {updateConfig,verifyRelease,compareVersions,sha256,UPDATE_PRODUCT} from '../updates/release.mjs';
 import {applyPreviewUpdate} from '../setup/apply-preview-update.mjs';
 import {createStudioServer} from '../studio-server.mjs';
@@ -95,6 +95,34 @@ test('same-version installer repair is allowed but downgrades remain blocked',as
   sourceManifest.version='0.5.0-preview.1';
   await writeFile(path.join(f.source,'preview-manifest.json'),JSON.stringify(sourceManifest));
   await assert.rejects(()=>applyPreviewUpdate({...f,allowSameVersion:true}),/older/);
+});
+
+test('Windows directory aliases retain the preview installation identity during updates',{skip:process.platform!=='win32'},async t=>{
+  const f=await updateFixture(t);
+  f.marker.root=path.toNamespacedPath(f.target);
+  await writeFile(path.join(f.target,'.preview-installation.json'),JSON.stringify(f.marker));
+  const result=await applyPreviewUpdate(f);
+  assert.equal(result.installationId,f.marker.installationId);
+  assert.deepEqual(JSON.parse(await readFile(path.join(f.target,'.preview-installation.json'),'utf8')),f.marker);
+});
+
+test('updates reject an installation marker pointing to another existing directory',async t=>{
+  const f=await updateFixture(t);
+  await writeFile(path.join(f.target,'.preview-installation.json'),JSON.stringify({...f.marker,root:f.source}));
+  await assert.rejects(()=>applyPreviewUpdate(f),/identity does not match/);
+  assert.equal(await readFile(path.join(f.target,'app.js'),'utf8'),'old');
+});
+
+test('update-manager installed status resolves Windows aliases without trusting a different root',{skip:process.platform!=='win32'},async t=>{
+  const base=await temp(t),other=path.join(base,'other');
+  await mkdir(other);
+  await writeFile(path.join(base,'package.json'),JSON.stringify({version:'0.7.0'}));
+  await writeFile(path.join(base,'updates-config.json'),JSON.stringify(config));
+  const marker={product:UPDATE_PRODUCT,root:path.toNamespacedPath(base),installationId:'alias-test'};
+  await writeFile(path.join(base,'.preview-installation.json'),JSON.stringify(marker));
+  assert.equal((await loadUpdateManager(base)).status().installed,true);
+  await writeFile(path.join(base,'.preview-installation.json'),JSON.stringify({...marker,root:other}));
+  assert.equal((await loadUpdateManager(base)).status().installed,false);
 });
 test('failed file update rolls back the changed application files',async t=>{
   const f=await updateFixture(t),oldManifest=await readFile(path.join(f.target,'preview-manifest.json'),'utf8');

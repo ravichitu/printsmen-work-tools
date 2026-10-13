@@ -36,7 +36,8 @@ export async function applyPreviewUpdate({source,target,beforeWrite=()=>{},allow
   source=await realpath(source);target=await realpath(target);
   if(source===target||source.startsWith(target+path.sep)||target.startsWith(source+path.sep))throw new Error('Update staging and installation must be separate.');
   const marker=JSON.parse(await readFile(path.join(target,'.preview-installation.json'),'utf8'));
-  if(marker.product!==UPDATE_PRODUCT||typeof marker.installationId!=='string'||path.resolve(marker.root).toLowerCase()!==target.toLowerCase())throw new Error('The preview installation identity does not match this directory.');
+  const recordedRoot=typeof marker.root==='string'&&path.isAbsolute(marker.root)?await realpath(marker.root).catch(()=>null):null;
+  if(marker.product!==UPDATE_PRODUCT||typeof marker.installationId!=='string'||recordedRoot?.toLowerCase()!==target.toLowerCase())throw new Error('The preview installation identity does not match this directory.');
   const old=await manifest(target),next=await manifest(source);
   const versionOrder=compareVersions(next.version,old.version);
   if(versionOrder<0||(!allowSameVersion&&versionOrder===0))throw new Error(versionOrder<0?'The installer is older than the installed version.':'The same version is already installed.');
