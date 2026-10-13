@@ -4,6 +4,7 @@ test-output/
 *.badge.json
 Backups/
 output/
+dist/
 .env
 .env.*
 *.zip

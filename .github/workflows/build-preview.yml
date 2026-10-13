@@ -1,0 +1,156 @@
+name: Check and build PrintsMen preview
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'PrintsMen Badge Studio/**'
+      - 'PrintsMen Licence Manager/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'PrintsMen Badge Studio/**'
+      - 'PrintsMen Licence Manager/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      PRINTSMEN_OPERATOR_CONFIG:
+        required: true
+    outputs:
+      version:
+        value: ${{ jobs.build.outputs.version }}
+      artifact_name:
+        value: ${{ jobs.build.outputs.artifact_name }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: printsmen-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/heads/') }}
+
+defaults:
+  run:
+    shell: pwsh
+    working-directory: PrintsMen Badge Studio
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      artifact_name: ${{ steps.metadata.outputs.artifact_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check release inputs and script syntax
+        run: npm run check
+
+      - name: Run production tests
+        run: npm test
+
+      - name: Configure the preview login from its salted hash
+        id: credentials
+        if: github.event_name != 'pull_request'
+        env:
+          PRINTSMEN_OPERATOR_CONFIG: ${{ secrets.PRINTSMEN_OPERATOR_CONFIG }}
+        run: |
+          if (-not $env:PRINTSMEN_OPERATOR_CONFIG) {
+            "ready=false" >> $env:GITHUB_OUTPUT
+            Write-Warning 'Checks passed. Installer packaging needs the owner-approved PRINTSMEN_OPERATOR_CONFIG secret.'
+            'Installer packaging is waiting for the owner-approved preview-login secret.' >> $env:GITHUB_STEP_SUMMARY
+            exit 0
+          }
+          node scripts/configure-ci-preview.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "ready=true" >> $env:GITHUB_OUTPUT
+
+      - name: Prepare build metadata
+        id: metadata
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          $package = Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json
+          "version=$($package.version)" >> $env:GITHUB_OUTPUT
+          "artifact_name=printsmen-preview-$($package.version)-$env:GITHUB_RUN_ID" >> $env:GITHUB_OUTPUT
+
+      - name: Locate the compiler and Node redistribution licence
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          if (-not (Test-Path -LiteralPath $compiler)) {
+            choco install nsis --yes --no-progress
+          }
+          if (-not (Test-Path -LiteralPath $compiler)) {
+            $compiler = (Get-Command makensis.exe -ErrorAction Stop).Source
+          }
+          "MAKENSIS=$compiler" >> $env:GITHUB_ENV
+          $nodeVersion = (node -p 'process.versions.node').Trim()
+          $archiveName = "node-v$nodeVersion-win-x64.zip"
+          $distribution = "https://nodejs.org/dist/v$nodeVersion"
+          $archivePath = Join-Path $env:RUNNER_TEMP $archiveName
+          Invoke-WebRequest "$distribution/$archiveName" -OutFile $archivePath
+          $checksums = (Invoke-WebRequest "$distribution/SHASUMS256.txt").Content
+          $entry = ($checksums -split "`n" | ForEach-Object {
+            $parts = $_.Trim() -split '\s+'
+            if ($parts.Length -eq 2 -and $parts[1] -eq $archiveName) { $parts[0] }
+          })
+          if (-not $entry -or (Get-FileHash -LiteralPath $archivePath).Hash.ToLowerInvariant() -ne $entry) {
+            throw 'Node distribution checksum did not match.'
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($archivePath)
+          try {
+            $licence = $zip.GetEntry("node-v$nodeVersion-win-x64/LICENSE")
+            if (-not $licence) { throw 'Node distribution licence is missing.' }
+            $licencePath = Join-Path $env:RUNNER_TEMP 'PrintsMen-Node-LICENSE'
+            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($licence, $licencePath, $true)
+          } finally { $zip.Dispose() }
+          "NODE_LICENSE=$licencePath" >> $env:GITHUB_ENV
+
+      - name: Build the package and installer
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          npm run check -- --installer
+          npm run package
+          $package = Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json
+          $version = $package.version
+          $installerDir = Join-Path $PWD 'dist\installer'
+          node scripts/build-preview-installer.mjs $installerDir $env:MAKENSIS $env:NODE_LICENSE
+          Copy-Item -LiteralPath (Join-Path $installerDir "PrintsMen-Badge-Studio-$version-Preview-Setup.exe") -Destination dist
+          Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "PrintsMen-Badge-Studio-Local-$version.zip") -Destination dist
+          Copy-Item -LiteralPath (Join-Path $installerDir 'BUILD-REPORT.json') -Destination dist
+          $artifacts = Get-ChildItem -LiteralPath dist -File | Where-Object { $_.Extension -in @('.exe', '.zip') }
+          $artifacts | ForEach-Object {
+            (Get-FileHash -LiteralPath $_.FullName).Hash.ToLowerInvariant() + '  ' + $_.Name
+          } | Set-Content -LiteralPath 'dist\SHA256SUMS.txt' -Encoding ascii
+          [pscustomobject]@{
+            version = $version
+            sourceCommit = $env:GITHUB_SHA
+            buildUrl = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            builtAt = (Get-Date).ToUniversalTime().ToString('o')
+          } | ConvertTo-Json | Set-Content -LiteralPath 'dist\SOURCE-REVISION.json' -Encoding utf8
+
+      - name: Make the installer available to download
+        if: steps.credentials.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact_name }}
+          path: |
+            PrintsMen Badge Studio/dist/*.exe
+            PrintsMen Badge Studio/dist/*.zip
+            PrintsMen Badge Studio/dist/*.json
+            PrintsMen Badge Studio/dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

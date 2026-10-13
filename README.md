@@ -25,9 +25,18 @@ runtime and requires the temporary local operator account configured by the owne
 The owner dashboard is separate. Read `PrintsMen Licence Manager/README.md` before
 creating keys. Never distribute its `private/` directory or its authority state.
 
+## Upgrade builds
+
+The current combined source is on `master`. Run `npm run check` from
+`PrintsMen Badge Studio` for fast release and syntax checks, or `npm run verify`
+for preflight plus the complete regression suite. Root-level GitHub Actions
+workflows check source pushes and prepare downloadable preview installers.
+Matching release tags reuse the tested build for signed update publishing.
+See `PrintsMen Badge Studio/QUICK-UPGRADES.md` for build secrets and downloads.
+
 ## Production boundary
 
 Online activation requires an owner-controlled HTTPS authority. Automatic updates
-require an owner-signed release feed hosted over HTTPS. Neither hosting service is
-configured in this repository. Do not expose the local preview server to the public
-internet.
+require a published owner-signed release feed. GitHub build automation is prepared;
+signed publishing still needs the owner's update-signing secret. Activation hosting
+and production licence enforcement remain pending. The preview stays local.

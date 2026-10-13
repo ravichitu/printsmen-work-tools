@@ -1,0 +1,73 @@
+name: Publish signed PrintsMen preview
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: printsmen-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-preview.yml
+    secrets:
+      PRINTSMEN_OPERATOR_CONFIG: ${{ secrets.PRINTSMEN_OPERATOR_CONFIG }}
+
+  publish:
+    needs: build
+    if: needs.build.outputs.artifact_name != ''
+    runs-on: windows-latest
+    timeout-minutes: 10
+    environment: printsmen-release
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: PrintsMen Badge Studio
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Retrieve the tested installer
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: PrintsMen Badge Studio/dist
+
+      - name: Sign the update feed
+        env:
+          PRINTSMEN_UPDATE_PRIVATE_KEY: ${{ secrets.PRINTSMEN_UPDATE_PRIVATE_KEY }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          if ($env:GITHUB_REF_NAME -ne "v$env:RELEASE_VERSION") {
+            throw 'The release tag must match package.json.'
+          }
+          if (-not $env:PRINTSMEN_UPDATE_PRIVATE_KEY) {
+            throw 'Configure PRINTSMEN_UPDATE_PRIVATE_KEY in the printsmen-release environment. The tested installer remains available in build artifacts.'
+          }
+          $installerName = "PrintsMen-Badge-Studio-$env:RELEASE_VERSION-Preview-Setup.exe"
+          $installerUrl = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:GITHUB_REF_NAME/$installerName"
+          node scripts/create-update-feed.mjs "dist\$installerName" "$env:RELEASE_VERSION-preview.1" $installerUrl dist\printsmen-update.json "PrintsMen $env:RELEASE_VERSION preview update."
+
+      - name: Publish the signed release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          gh release create $env:GITHUB_REF_NAME `
+            "dist\PrintsMen-Badge-Studio-$env:RELEASE_VERSION-Preview-Setup.exe" `
+            "dist\PrintsMen-Badge-Studio-Local-$env:RELEASE_VERSION.zip" `
+            'dist\printsmen-update.json' 'dist\SHA256SUMS.txt' `
+            'dist\BUILD-REPORT.json' 'dist\SOURCE-REVISION.json' `
+            --verify-tag --title "PrintsMen $env:RELEASE_VERSION" `
+            --notes "Local preview release with a signed update feed. The installer is not yet Authenticode-signed."

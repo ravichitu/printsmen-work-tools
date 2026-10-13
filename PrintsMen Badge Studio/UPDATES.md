@@ -7,8 +7,8 @@ the same bundled runtime and operator sign-in as the studio.
 ## Automatic Behaviour
 
 - Checks on startup and every six hours while the studio server runs.
-- Downloads only an owner-signed, newer preview release from HTTPS, with no
-  redirects. Verifies the Ed25519 signature, exact byte count and SHA-256 digest.
+- Downloads only an owner-signed, newer preview release from HTTPS, following
+  release-asset redirects. Verifies the Ed25519 signature, exact byte count and SHA-256 digest.
 - Installs automatically only after all editor tabs are closed and five minutes
   with no studio activity. Badge Designer and PrintsMen editor tabs always block
   automatic installation, even if their work appears saved. Suspended tabs also
@@ -39,19 +39,25 @@ The manager follows GitHub's release-asset redirects, then verifies the signed
 Ed25519 envelope, installer byte count and SHA-256 before it can install. Only
 public configuration is distributed; no signing private key is in the installer.
 
-The repository workflow at `.github/workflows/release-preview.yml` runs on a
-matching `vX.Y.Z` tag. It tests the app, builds the installer and portable ZIP,
-creates `printsmen-update.json`, and publishes all three as GitHub Release
-assets. Configure the repository's protected `printsmen-release` environment
+The workflows are under `.github/workflows/` at the repository root, one level
+above this studio folder. `build-preview.yml` checks source pushes to `master`,
+runs the full suite and builds downloadable installer artifacts. Pull requests
+run only checks. It uses `PRINTSMEN_OPERATOR_CONFIG`, a repository secret holding
+the existing preview operator's salted hash configuration.
+
+`release-preview.yml` runs on a matching `vX.Y.Z` tag and reuses that build.
+It creates `printsmen-update.json` and publishes the tested installer, portable
+ZIP and checksums as GitHub Release assets. Configure the `printsmen-release` environment
 with the secret `PRINTSMEN_UPDATE_PRIVATE_KEY`, containing the Ed25519 PKCS#8
 private PEM that matches the public key pinned in `updates-config.json`. Keep
 that secret owner-only and require environment approval for release runs.
 
-The workflow is intentionally tag-driven: ordinary branch pushes do not ship an
-installer. Push the code, review it, then create and push a matching tag such as
-`v0.9.6`. The current 0.9.5 installer was built before this GitHub feed was
-configured, so it needs one manual install of a later GitHub-enabled release;
-subsequent releases can update automatically while the studio is idle.
+Publishing is tag-driven: ordinary branch pushes create downloadable build
+artifacts but do not publish an installed-app update. Push the code, review the
+build, then create and push a matching tag such as `v0.9.6`. Updates preserve
+the installed feed and trust key. An older installation with an empty feed needs
+owner configuration of that installation; installing a later EXE alone does not
+enable its automatic checks. See QUICK-UPGRADES.md for the short workflow.
 
 Owner-only release commands, from the separate PrintsMen Licence Manager folder:
 
