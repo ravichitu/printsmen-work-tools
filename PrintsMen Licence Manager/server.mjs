@@ -86,6 +86,24 @@ export function createAuthorityServer({store, publicOrigin = null, testMode = fa
       if (url.pathname === '/api/dashboard' && req.method === 'GET') {
         const state = await owner(); return json(res,200,{...dashboard(state),security:securitySummary(state),csrf:session.csrf,localTest:!publicOrigin || testMode});
       }
+      if(url.pathname==='/api/supabase/config'&&req.method==='GET'){
+        await owner();
+        const config=JSON.parse(await readFile(path.join(root,'..','PrintsMen Badge Studio','supabase','config.json'),'utf8'));
+        const parsed=new URL(config.url);
+        if(config.schema!==1||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(config.url)||!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(config.publishableKey))return json(res,503,{error:'Supabase public configuration is invalid.'});
+        return json(res,200,{url:parsed.origin,publishableKey:config.publishableKey});
+      }
+      if(url.pathname==='/api/supabase/export'&&req.method==='GET'){
+        const state=await owner();
+        const keys=state.keys.map(key=>({id:key.id,keyHash:key.hash,customer:key.customer,client:key.client||null,tools:key.tools,expiresAt:key.expiresAt||null,createdAt:key.createdAt,
+          state:key.replacedAt?'revoked':key.expiresAt&&Date.parse(key.expiresAt)<=Date.now()?'expired':key.boundInstallation?'active':'pending'}));
+        const installations=state.requests.filter(request=>request.registration?.consent===true&&/^[0-9a-f]{64}$/.test(request.machineHash||'')).map(request=>({
+          installationId:request.installationId,keyId:request.keyId,deviceHash:request.machineHash,appVersion:request.registration.appVersion,platform:request.registration.platform,
+          activationMode:request.activationMode||'online',state:request.state==='rejected'?'revoked':request.confirmedAt?'active':request.state==='approved'?'approved':'pending',
+          receivedAt:request.receivedAt,approvedAt:request.approvedAt||null,lastReportedAt:request.lastReportedAt||null,noticeAcceptedAt:request.registration.noticeAcceptedAt
+        }));
+        return json(res,200,{keys,installations});
+      }
       if (url.pathname === '/api/security/enrol/start' && req.method === 'POST') {
         await owner(true); rate('security',5); const body = await readJson(req);
         const version = await ownerChange(state => reauthenticate(state,body));
@@ -157,9 +175,11 @@ export function createAuthorityServer({store, publicOrigin = null, testMode = fa
       const assets = {'/':'index.html','/index.html':'index.html','/dashboard.js':'dashboard.js','/dashboard.css':'dashboard.css','/licence-sheet.mjs':'licence-sheet.mjs','/client-sheet.css':'client-sheet.css'};
       if (req.method === 'GET' && assets[url.pathname]) {
         const file = assets[url.pathname];
+        let supabaseOrigin='';
+        try{supabaseOrigin=new URL(JSON.parse(await readFile(path.join(root,'..','PrintsMen Badge Studio','supabase','config.json'),'utf8')).url).origin;}catch{}
         res.writeHead(200,{'Content-Type':/\.m?js$/.test(file)?'text/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8',
           'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
-          'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});
+          'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' "+supabaseOrigin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});
         return res.end(await readFile(path.join(root,file)));
       }
       return json(res,404,{error:'Not found.'});

@@ -15,6 +15,7 @@ async function refresh() {
   $('validity').textContent = licence.state === 'active' ? (licence.expiresAt?'Expires '+new Date(licence.expiresAt).toLocaleString():'Lifetime of this installation; no expiry') : ['development','preview'].includes(licence.mode) ? 'No production licence applied' : 'Approval required';
   $('tools').textContent = licence.state === 'active' ? data.tools.filter(tool => licence.tools.includes(tool.id)).map(tool => tool.name).join(', ') : ['development','preview'].includes(licence.mode) ? 'All tools available for local testing' : 'Locked until approved';
   $('open').hidden = !licence.active;
+  $('cloudRegistration').hidden = !(licence.mode==='managed'&&licence.active&&data.authentication?.loggedIn);
   $('activate').disabled = busy || !data.onlineActivation || licence.state === 'invalid';
   if (licence.customer && !$('shop').value) $('shop').value = licence.customer;
   if (!data.onlineActivation) $('result').textContent = licence.mode==='managed'?'Use Offline activation below to exchange files with your owner.':'This preview is not a managed installation. Offline licensing requires an owner-issued managed package.';
@@ -24,12 +25,18 @@ $('activationForm').addEventListener('submit', async event => {
   if (busy) return;
   busy = true; $('activate').disabled = true; $('result').textContent = 'Contacting the online approval service...';
   try {
-    const response = await fetch('/api/licence/activate', {method:'POST', headers:{'Content-Type':'application/json','X-Studio-CSRF':token}, body:JSON.stringify({customer:$('shop').value.trim(),licenceKey:$('licenceKey').value.trim(),client:{email:$('clientEmail').value.trim(),phone:$('clientPhone').value.trim()}})});
+    const response = await fetch('/api/licence/activate', {method:'POST', headers:{'Content-Type':'application/json','X-Studio-CSRF':token}, body:JSON.stringify({customer:$('shop').value.trim(),licenceKey:$('licenceKey').value.trim(),client:{email:$('clientEmail').value.trim(),phone:$('clientPhone').value.trim()},registration:{consent:$('activationConsent').checked}})});
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Activation failed.');
     $('result').textContent = result.message;
   } catch (error) { $('result').textContent = error.message; }
   finally { busy = false; await refresh().catch(error => { $('message').textContent = error.message; }); }
+});
+$('reportInstallation').addEventListener('click',async()=>{
+  if(busy)return;if(!$('cloudConsent').checked){$('cloudResult').textContent='Please confirm the reporting consent first.';return;}
+  busy=true;$('reportInstallation').disabled=true;$('cloudResult').textContent='Sending the consented device record...';
+  try{const response=await fetch('/api/supabase/register-installation',{method:'POST',headers:{'Content-Type':'application/json','X-Studio-CSRF':token},body:JSON.stringify({consent:true})});const result=await response.json();if(!response.ok)throw new Error(result.error||'Registration failed.');$('cloudResult').textContent='Reported at '+new Date(result.reportedAt).toLocaleString()+'.';}
+  catch(error){$('cloudResult').textContent=error.message;}finally{busy=false;$('reportInstallation').disabled=false;}
 });
 function downloadActivation(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 const offline=document.createElement('section');

@@ -16,7 +16,7 @@ const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript','.mjs'
   '.wasm':'application/wasm','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.woff':'font/woff','.woff2':'font/woff2','.ttf':'font/ttf','.json':'application/json'};
 export const rootId = root => createHash('sha256').update(path.resolve(root).toLowerCase()).digest('hex').slice(0,24);
 
-export function createStudioServer({root, gate = null, activation = null, configurationError = '', operatorAuth = null, edition = 'development', updates=null}) {
+export function createStudioServer({root, gate = null, activation = null, configurationError = '', operatorAuth = null, supabaseConfig=null, edition = 'development', updates=null}) {
   const csrf = randomBytes(32).toString('hex');
   const status = () => configurationError ? {mode:'managed', state:'invalid', active:false, message:configurationError} : gate ? gate.status() : edition === 'preview' ?
     {mode:'preview',state:'preview',active:true,message:'LOCAL PREVIEW: all tools enabled for testing. Production licensing and online activation are not enabled.'} :
@@ -39,6 +39,21 @@ export function createStudioServer({root, gate = null, activation = null, config
         sameOrigin(req,origin);
         if(req.headers['x-studio-csrf']!==csrf)return json(res,403,{error:'Invalid session request.'});
         operatorAuth?.logout(req,res);return json(res,200,{ok:true});
+      }
+      if(url.pathname==='/api/supabase/register-installation'&&req.method==='POST'){
+        sameOrigin(req,origin);
+        if(!operatorAuth?.status(req).loggedIn)return json(res,401,{error:'Sign in before registering this installation.'});
+        if(req.headers['x-studio-csrf']!==csrf)return json(res,403,{error:'Reload the dashboard and try again.'});
+        const body=await readJson(req),identity=operatorAuth.identity(req),licence=await status();
+        if(body.consent!==true)return json(res,400,{error:'Confirm the installation reporting notice first.'});
+        if(!supabaseConfig||!identity||!gate||!licence.active||licence.mode!=='managed')return json(res,409,{error:'Only an activated managed installation can be registered.'});
+        const installation=await gate.request(),base=supabaseConfig.url+'/rest/v1/rpc/printsmen_report_installation';
+        const headers={'apikey':supabaseConfig.publishableKey,'Authorization':'Bearer '+identity.accessToken,'Content-Type':'application/json'};
+        let response,result;
+        try{response=await fetch(base,{method:'POST',headers,body:JSON.stringify({p_install_id:installation.installationId,p_device_hash:installation.machineHash,p_app_version:updates?.version||'unknown',p_platform:process.platform,p_activation_mode:'online'}),signal:AbortSignal.timeout(12000),redirect:'error'});result=await response.json();}
+        catch(error){if(error.name==='TimeoutError')return json(res,503,{error:'Supabase request timed out. Try again when connected.'});return json(res,503,{error:'Could not reach Supabase. Check the internet connection.'});}
+        if(!response.ok)return json(res,503,{error:typeof result==='string'?result:'Could not register the installation in Supabase. Apply both licensing migrations and confirm this account is active.'});
+        return json(res,200,{ok:true,reportedAt:result});
       }
       if (url.pathname === '/api/studio/shutdown' && req.method === 'POST') {
         sameOrigin(req, origin);
@@ -92,7 +107,8 @@ export function createStudioServer({root, gate = null, activation = null, config
         const body = await readJson(req);
         if (typeof body.customer !== 'string' || !body.customer.trim() || body.customer.trim().length > 120) return json(res, 400, {error:'Enter a shop/operator name (1-120 characters).'});
         if (typeof body.licenceKey !== 'string' || !/^PM1-[A-Za-z0-9_-]{32}$/.test(body.licenceKey)) return json(res, 400, {error:'Enter a valid owner-issued licence key.'});
-        return json(res, 200, await activation.activate(body.customer.trim(), body.licenceKey, body.client));
+        const registration=body.registration?.consent===true?{consent:true,appVersion:updates?.version||'unknown',platform:process.platform}:undefined;
+        return json(res, 200, await activation.activate(body.customer.trim(), body.licenceKey, body.client, registration));
       }
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, {error:'Method not allowed.'});
       let relative = decodeURIComponent(url.pathname).replace(/^\//, '') || 'index.html';
@@ -140,7 +156,7 @@ export function createStudioServer({root, gate = null, activation = null, config
       }
       const headers = {'Content-Type':types[path.extname(file)] || 'application/octet-stream', 'Cache-Control':'no-store',
         'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
-      if (publicFiles.has(relative)) headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
+      if (publicFiles.has(relative)) headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self' "+(supabaseConfig?.url||'')+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
       res.writeHead(200, headers);
       res.end(req.method === 'HEAD' ? undefined : bytes);
     } catch (error) { json(res, error.status || (error.code === 'ENOENT' ? 404 : 400), {error:error.code === 'ENOENT' ? 'Not found.' : error.message}); }

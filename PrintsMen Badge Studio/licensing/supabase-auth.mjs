@@ -29,10 +29,11 @@ export function createSupabaseAuth(config,{cookieName='pm_supabase'}={}) {
       const lifetime=Math.min(8*60*60,Math.max(60,Number(auth.expires_in)||3600));
       if(sessions.size>=100)fail('Too many active sign-ins. Sign out elsewhere first.',429);
       const token=randomBytes(32).toString('base64url');
-      sessions.set(hash(token),{email:auth.user.email||email,role:profile.role,accessToken:auth.access_token,expires:Date.now()+lifetime*1000});
+      sessions.set(hash(token),{userId:auth.user.id,email:auth.user.email||email,role:profile.role,accessToken:auth.access_token,expires:Date.now()+lifetime*1000});
       res.setHeader('Set-Cookie',`${cookieName}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${lifetime}`);
       return {ok:true,email:auth.user.email||email,role:profile.role};
     },
+    identity(req){const {session}=current(req);return session?{userId:session.userId,email:session.email,role:session.role,accessToken:session.accessToken}:null;},
     logout(req,res){sessions.delete(current(req).id);res.setHeader('Set-Cookie',cookieName+'=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');}
   };
 }

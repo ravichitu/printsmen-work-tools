@@ -40,12 +40,12 @@ export class OnlineActivation {
     if (!response.ok) throw new Error(result.error || 'Online activation was refused.');
     return result;
   }
-  async activate(customer, licenceKey, client) {
+  async activate(customer, licenceKey, client, registration) {
     if (this.busy) throw new Error('An activation check is already running.');
     this.busy = true;
     try {
       const request = await this.gate.request();
-      const reply = await this.send('/v1/activation/request', {...request, customer, licenceKey, client});
+      const reply = await this.send('/v1/activation/request', {...request, customer, licenceKey, client, registration});
       if (reply.state !== 'approved') return {state:reply.state, message:reply.message || 'Request sent. Waiting for owner approval.'};
       if (!reply.licence) throw new Error('The approval receipt is missing.');
       // Only a verified receipt from this online exchange can unlock the installation.

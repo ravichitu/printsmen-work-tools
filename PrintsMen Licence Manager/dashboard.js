@@ -2,8 +2,9 @@ import {licenceSheet} from './licence-sheet.mjs';
 const $ = id => document.getElementById(id);
 let csrf = '', tools = [], busy = false, signedIn = false;
 let issuedRecord=null;
+let supabase=null,supabaseToken='',supabaseUser=null;
 function clearSecurityInputs(){for(const id of ['securityPassword','securityCode','newOwnerPassword','mfaSecret','mfaConfirmCode'])$(id).value='';$('mfaConfirmForm').hidden=true;}
-function signedOut(){signedIn=false;csrf='';clearKey();clearSecurityInputs();$('dashboard').hidden=true;$('loginPanel').hidden=false;$('logout').hidden=true;$('requests').replaceChildren();$('keys').replaceChildren();$('auditRows').replaceChildren();}
+function signedOut(){signedIn=false;csrf='';supabase=null;supabaseToken='';supabaseUser=null;clearKey();clearSecurityInputs();$('dashboard').hidden=true;$('loginPanel').hidden=false;$('logout').hidden=true;$('requests').replaceChildren();$('keys').replaceChildren();$('auditRows').replaceChildren();}
 function clearRecoveryCodes(){$('securityReceipt').hidden=true;$('ownerRecoveryCodes').textContent='';}
 const clientFields=[['contactPerson','Contact person',120],['phone','Phone',40],['email','Email',254],['address','Address',600],['reference','Customer reference',80]];
 const clientForm=document.createElement('div');clientForm.className='client-fields';
@@ -80,4 +81,37 @@ function saveOffline(value,name){const url=URL.createObjectURL(new Blob([JSON.st
 const offlinePanel=document.createElement('section');offlinePanel.className='panel';const offlineTitle=document.createElement('h2');offlineTitle.textContent='Offline clients and installation register';const summary=document.createElement('p');summary.id='installationSummary';offlinePanel.append(offlineTitle,summary);
 for(const [action,label] of [['request','Import client activation request'],['confirmation','Import client confirmation']]){const wrap=document.createElement('label');wrap.textContent=label;const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=()=>run(async()=>{try{const file=input.files[0];if(!file||file.size>16384)throw new Error('Choose an activation JSON file under 16 KB.');await api('/api/offline/'+action,JSON.parse(await file.text()));await refresh();}finally{input.value='';}});wrap.append(input);offlinePanel.append(wrap);}
 $('dashboard').prepend(offlinePanel);
+async function cloudRequest(path,method='GET',body){
+  const response=await fetch(supabase.url+path,{method,headers:{apikey:supabase.publishableKey,Authorization:'Bearer '+supabaseToken,...(body?{'Content-Type':'application/json'}:{}),...(method==='POST'?{Prefer:'resolution=merge-duplicates,return=minimal'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',signal:AbortSignal.timeout(15000),redirect:'error'});
+  const text=await response.text();if(!response.ok){let detail='';try{detail=JSON.parse(text).message||JSON.parse(text).error_description||'';}catch{}throw new Error(detail||'Supabase request failed with HTTP '+response.status+'.');}return text?JSON.parse(text):null;
+}
+function cloudState(message,connected=false){$('cloudStatus').textContent=message;$('cloudSync').disabled=!connected;$('cloudDisconnect').hidden=!connected;$('cloudLogin').hidden=connected;}
+$('cloudLogin').addEventListener('submit',event=>{event.preventDefault();run(async()=>{
+  $('cloudStatus').textContent='Checking Supabase account and access...';
+  const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;$('cloudPassword').value='';
+  try{
+    const config=await api('/api/supabase/config');supabase=config;
+    const response=await fetch(config.url+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:config.publishableKey,'Content-Type':'application/json'},body:JSON.stringify({email,password}),cache:'no-store',signal:AbortSignal.timeout(12000),redirect:'error'});const auth=await response.json();if(!response.ok||!auth.access_token)throw new Error('Supabase sign-in failed. Check the email and password.');
+    supabaseToken=auth.access_token;supabaseUser=auth.user?.id;
+    const profiles=await cloudRequest('/rest/v1/profiles?id=eq.'+encodeURIComponent(supabaseUser)+'&select=role,account_state');
+    if(!profiles?.length||profiles[0].account_state!=='active'||!['owner','admin'].includes(profiles[0].role))throw new Error('An active owner/admin profile is required to sync the licence register.');
+    cloudState('Connected as '+email+'. No data has been synced yet.',true);
+  }catch(error){supabaseToken='';supabaseUser=null;supabase=null;throw error;}
+});});
+$('cloudSync').addEventListener('click',()=>run(async()=>{
+  if(!supabaseToken||!supabaseUser)throw new Error('Connect to Supabase first.');
+  cloudState('Preparing local licence records and consented device reports...',true);
+  try{
+    const {keys,installations}=await api('/api/supabase/export');
+    const batches=items=>{const result=[];for(let index=0;index<items.length;index+=100)result.push(items.slice(index,index+100));return result;};
+    const clients=keys.map(key=>{const client=key.client||{};return{id:key.id,company_name:key.customer,contact_name:client.contactPerson||'',email:client.email||'',phone:client.phone||'',address:client.address||'',reference:client.reference||'',created_by:supabaseUser};});
+    const licences=keys.map(key=>({id:key.id,client_id:key.id,key_hash:key.keyHash,allowed_tools:key.tools,installation_limit:1,licence_state:key.state,issued_at:key.createdAt,expires_at:key.expiresAt,created_by:supabaseUser}));
+    const deviceRows=installations.map(item=>({user_id:supabaseUser,licence_id:item.keyId,install_id:item.installationId,device_hash:item.deviceHash,app_version:item.appVersion,platform:item.platform,activation_mode:item.activationMode,install_state:item.state,notice_accepted_at:item.noticeAcceptedAt,first_seen_at:item.receivedAt,approved_at:item.approvedAt,last_reported_at:item.lastReportedAt}));
+    for(const batch of batches(clients))await cloudRequest('/rest/v1/clients?on_conflict=id','POST',batch);
+    for(const batch of batches(licences))await cloudRequest('/rest/v1/licences?on_conflict=id','POST',batch);
+    for(const batch of batches(deviceRows))await cloudRequest('/rest/v1/installations?on_conflict=install_id','POST',batch);
+    cloudState('Sync complete at '+new Date().toLocaleString()+'. '+keys.length+' licence records and '+installations.length+' consented installation records sent.',true);
+  }catch(error){cloudState('Sync incomplete: '+error.message,true);throw error;}
+}));
+$('cloudDisconnect').addEventListener('click',()=>{supabaseToken='';supabaseUser=null;supabase=null;cloudState('Disconnected. Supabase token cleared from this page.');});
 refresh().catch(error=>{$('message').textContent=error.message==='Owner sign-in is required.'?'Sign in to manage licences.':error.message;});
