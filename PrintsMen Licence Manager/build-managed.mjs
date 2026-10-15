@@ -11,7 +11,7 @@ import {createOperatorAuth} from '../PrintsMen Badge Studio/licensing/operator-a
 
 export async function buildManagedBundle({appRoot, destination, config, operatorConfig, allowTestHttp=false}) {
   config=validateAuthority(config,{allowTestHttp});
-  config={schema:1,url:config.url,publicKey:config.publicKey};
+  config=config.mode==='offline'?{schema:1,mode:'offline',publicKey:config.publicKey}:{schema:1,url:config.url,publicKey:config.publicKey};
   operatorConfig ||= JSON.parse(await readFile(path.join(appRoot,'operator-auth.json'),'utf8'));
   createOperatorAuth(operatorConfig);
   if(await lstat(destination).then(()=>true,error=>{if(error.code!=='ENOENT')throw error;return false;}))throw new Error('Build destination already exists. Nothing was overwritten.');
@@ -34,5 +34,5 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   const [url,destination]=process.argv.slice(2);
   if(!url||!destination)throw new Error('Usage: node build-managed.mjs https://YOUR-ACTIVATION-DOMAIN ABSOLUTE-OUTPUT-DIRECTORY');
   const state=await new LicenceStore(path.join(ownerRoot,'private','authority.dpapi'),windowsProtection).read();
-  console.log(await buildManagedBundle({appRoot:path.resolve(ownerRoot,'../PrintsMen Badge Studio'),destination:path.resolve(destination),config:{schema:1,url,publicKey:state.publicKey}}));
+  console.log(await buildManagedBundle({appRoot:path.resolve(ownerRoot,'../PrintsMen Badge Studio'),destination:path.resolve(destination),config:url==='offline'?{schema:1,mode:'offline',publicKey:state.publicKey}:{schema:1,url,publicKey:state.publicKey}}));
 }

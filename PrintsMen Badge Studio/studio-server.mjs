@@ -65,6 +65,25 @@ export function createStudioServer({root, gate = null, activation = null, config
         }
         return json(res,404,{error:'Unknown update action.'});
       }
+      if (url.pathname.startsWith('/api/licence/offline/') && req.method === 'POST') {
+        sameOrigin(req, origin);
+        if(operatorAuth&&!operatorAuth.status(req).loggedIn)return json(res,401,{error:'Sign in before activating.'});
+        if(req.headers['x-studio-csrf']!==csrf)return json(res,403,{error:'Reload the activation page.'});
+        if(!gate||configurationError)return json(res,503,{error:'A managed installation with an owner public key is required.'});
+        const body=await readJson(req);
+        if(url.pathname.endsWith('/request')) {
+          if(body.consent!==true)return json(res,400,{error:'Accept the activation data notice first.'});
+          if(typeof body.customer!=='string'||!body.customer.trim()||body.customer.length>120||!/^PM1-[A-Za-z0-9_-]{32}$/.test(body.licenceKey))return json(res,400,{error:'Enter the client name and licence key.'});
+          return json(res,200,{...await gate.request(),customer:body.customer.trim(),licenceKey:body.licenceKey,client:body.client,activationMode:'offline',registration:{appVersion:updates?.version||'unknown',platform:process.platform,consent:true}});
+        }
+        if(url.pathname.endsWith('/import'))return json(res,200,await gate.activate(body));
+        if(url.pathname.endsWith('/confirmation')) {
+          const current=await gate.status();
+          if(!current.active)return json(res,409,{error:'Activate this installation first.'});
+          return json(res,200,{...await gate.request(),licenceId:current.licenceId});
+        }
+        return json(res,404,{error:'Unknown offline action.'});
+      }
       if (url.pathname === '/api/licence/activate' && req.method === 'POST') {
         sameOrigin(req, origin);
         if(operatorAuth&&!operatorAuth.status(req).loggedIn)return json(res,401,{error:'Sign in before activating.'});

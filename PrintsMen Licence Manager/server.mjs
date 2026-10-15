@@ -110,6 +110,17 @@ export function createAuthorityServer({store, publicOrigin = null, testMode = fa
         });
         sessions.clear(); return json(res,200,{ok:true,signedOut:true});
       }
+      if (url.pathname.startsWith('/api/offline/') && req.method === 'POST') {
+        await owner(true);const body=await readJson(req);
+        if(url.pathname==='/api/offline/request')return json(res,200,await ownerChange(state=>{const result=requestActivation(state,{...body,activationMode:'offline'});audit(state,'activation.offline-imported',{target:body.installationId});return result;}));
+        if(url.pathname==='/api/offline/confirmation')return json(res,200,await ownerChange(state=>{const result=confirmActivation(state,body);audit(state,'activation.offline-confirmed',{target:body.installationId});return result;}));
+        if(url.pathname==='/api/offline/receipt'){
+          const state=await owner();const request=state.requests.find(r=>r.installationId===body.installationId);
+          if(!request||request.state!=='approved')return json(res,409,{error:'Owner approval is required before downloading.'});
+          return json(res,200,request.licence);
+        }
+        return json(res,404,{error:'Unknown offline action.'});
+      }
       if (url.pathname === '/api/keys' && req.method === 'POST') {
         await owner(true); const body = await readJson(req);
         return json(res,201,await ownerChange(state=>{const result=generateLicenceKey(state,body);audit(state,'licence.issued',{target:result.id});return result;}));

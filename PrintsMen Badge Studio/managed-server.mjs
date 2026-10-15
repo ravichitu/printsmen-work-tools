@@ -8,15 +8,17 @@ import {OnlineActivation, validateAuthority} from './licensing/online.mjs';
 import {createStudioServer,rootId} from './studio-server.mjs';
 import {createOperatorAuth} from './licensing/operator-auth.mjs';
 import {loadUpdateManager} from './updates/manager.mjs';
+import {createSupabaseAuth} from './licensing/supabase-auth.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 let gate = null, activation = null, configurationError = '',operatorAuth=null;
 try {
-  operatorAuth=createOperatorAuth(JSON.parse(await readFile(path.join(root,'operator-auth.json'),'utf8')),{cookieName:'pm_operator_'+rootId(root)});
+  const authConfig=JSON.parse(await readFile(path.join(root,'supabase/config.json'),'utf8'));
+  operatorAuth=createSupabaseAuth(authConfig,{cookieName:'pm_supabase_'+rootId(root)});
   const config = validateAuthority(JSON.parse(await readFile(path.join(root, 'activation-authority.json'), 'utf8')));
   gate = new InstallationGate({root, publicKey:config.publicKey, machineHash:await windowsMachineHash(),
     store:new LicenceStore(defaultStateFile(), windowsProtection)});
-  activation = new OnlineActivation({gate, config});
+  if(config.mode!=='offline')activation = new OnlineActivation({gate, config});
 } catch (error) { configurationError = 'Managed activation configuration is unavailable. Contact the owner. ' + error.message; }
 const updates=await loadUpdateManager(root).catch(error=>{console.error('Updates disabled: '+error.message);return null;});
 const server = createStudioServer({root, gate, activation, configurationError,operatorAuth,updates});

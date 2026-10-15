@@ -62,6 +62,38 @@ async function call(base,url,body,{cookie,csrf,origin=base}={}) {
   return {response,value:await response.json()};
 }
 
+test('offline activation validates consent, owner approval, installation binding and confirmation',integration,async t=>{
+  const f=await fixture(t),state=await owner.newAuthority(password);
+  state.publicKey=f.publicKey;state.privateKey=f.privateKey;
+  const key=owner.generateLicenceKey(state,{customer:'Offline shop',tools:['badge']});
+  const base=await listen(t,createStudioServer({root:f.folder,gate:f.gate}));
+  const status=await call(base,'/api/studio/status');
+  const send=async(action,body)=>{
+    const response=await fetch(base+'/api/licence/offline/'+action,{method:'POST',headers:{Origin:base,'Content-Type':'application/json','X-Studio-CSRF':status.value.csrf},body:JSON.stringify(body)});
+    return {status:response.status,value:await response.json()};
+  };
+  const input={customer:'Offline shop',licenceKey:key.key};
+  assert.equal((await send('request',input)).status,400);
+  const request=await send('request',{...input,consent:true});assert.equal(request.status,200);
+  assert.equal(owner.requestActivation(state,request.value).state,'pending');
+  owner.decideActivation(state,f.installation.installationId,'approve');
+  const receipt=state.requests[0].licence;
+  assert.notEqual((await send('import',{...receipt,signature:'a'.repeat(86)})).status,200);
+  const other=await fixture(t);await assert.rejects(()=>other.gate.activate(receipt));
+  assert.equal((await send('import',receipt)).value.active,true);
+  const confirmation=await send('confirmation',{});owner.confirmActivation(state,confirmation.value);
+  const data=owner.dashboard(state);assert.equal(data.summary.approved,1);assert.equal(data.summary.confirmed,1);
+  assert.equal(data.requests[0].activationMode,'offline');assert(data.requests[0].lastReportedAt);
+  assert(!JSON.stringify(data).includes(key.key));assert(!data.requests[0].challenge);
+});
+
+test('offline authority requires a trusted signing key but no hosted service',()=>{
+  const pair=generateKeyPairSync('ed25519');const publicKey=pair.publicKey.export({type:'spki',format:'pem'});
+  assert.equal(validateAuthority({schema:1,mode:'offline',publicKey}).mode,'offline');
+  assert.throws(()=>validateAuthority({schema:1,mode:'offline',publicKey,url:'https://example.com'}));
+  assert.throws(()=>new OnlineActivation({config:{schema:1,mode:'offline',publicKey}}),/file exchange/);
+});
+
 test('catalogue covers Badge Studio and every legacy page without duplicate IDs',async()=>{
   const html=await readFile(path.join(appRoot,'printsmen','index.html'),'utf8');
   const pages=[...html.matchAll(/class="tab(?: active)?" data-page="(page\d+)"/g)].map(m=>m[1]).filter(p=>p!=='page0');

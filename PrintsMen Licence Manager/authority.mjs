@@ -49,6 +49,14 @@ export function recoverLicenceKey(state,{keyId,recoveryKey}){
 
 export function requestActivation(state, input) {
   validateRequest(input);
+  const activationMode=input.activationMode||'online';
+  if(!['online','offline'].includes(activationMode))reject('Invalid activation mode.');
+  let registration=null;
+  if(input.registration){
+    const r=input.registration;
+    if(r.consent!==true||typeof r.appVersion!=='string'||r.appVersion.length>40||typeof r.platform!=='string'||r.platform.length>40)reject('Invalid installation registration.');
+    registration={appVersion:r.appVersion,platform:r.platform,noticeAcceptedAt:new Date().toISOString()};
+  }
   if (input.authorityFingerprint !== authorityFingerprint(state.publicKey)) reject('This installation trusts a different authority.', 403);
   if (typeof input.licenceKey !== 'string' || !/^PM1-[A-Za-z0-9_-]{32}$/.test(input.licenceKey)) reject('A valid owner-issued licence key is required.', 403);
   const key = state.keys.find(key => key.hash === keyHash(input.licenceKey));
@@ -64,7 +72,7 @@ export function requestActivation(state, input) {
     request = {schema:1, type:'activation-request', product:PRODUCT, installationId:input.installationId,
       machineHash:input.machineHash, authorityFingerprint:input.authorityFingerprint, challenge:input.challenge,
       keyId:key.id, customer:key.customer, client:key.client||null, tools:[...key.tools], expiresAt:key.expiresAt||null, state:'pending', receivedAt:new Date().toISOString(),
-      approvedAt:null, confirmedAt:null, licence:null};
+      approvedAt:null, confirmedAt:null, licence:null, activationMode, registration};
     state.requests.push(request);
   }
   return request.state === 'approved' ? {state:'approved', licence:request.licence} :
@@ -93,12 +101,14 @@ export function confirmActivation(state, input) {
   const payload = JSON.parse(Buffer.from(request.licence.payload, 'base64url').toString('utf8'));
   if (payload.licenceId !== input.licenceId) reject('Activation receipt does not match.', 403);
   request.confirmedAt ||= new Date().toISOString();
+  request.lastReportedAt = new Date().toISOString();
   return {state:'confirmed', confirmedAt:request.confirmedAt};
 }
 
 export function dashboard(state) {
-  return {tools:TOOL_CATALOG, authorityFingerprint:authorityFingerprint(state.publicKey),
+  const expired=r=>!!r.expiresAt&&Date.parse(r.expiresAt)<=Date.now();
+  return {summary:{clients:new Set(state.keys.map(k=>k.customer.trim().toLowerCase())).size,installations:state.requests.length,pending:state.requests.filter(r=>r.state==='pending').length,approved:state.requests.filter(r=>r.state==='approved'&&!expired(r)).length,expired:state.requests.filter(expired).length,confirmed:state.requests.filter(r=>r.confirmedAt&&!expired(r)).length},tools:TOOL_CATALOG, authorityFingerprint:authorityFingerprint(state.publicKey),
     keys:state.keys.map(({hash, recoveryHash, ...key}) => key),
     requests:state.requests.map(({challenge, licence, machineHash, ...request}) => ({...request, machineLabel:machineHash.slice(0,12),
-      status:request.confirmedAt ? 'Activated (client confirmed)' : request.state === 'approved' ? 'Approved; awaiting client' : request.state}))};
+      status:expired(request)?'Expired':request.confirmedAt ? 'Activated (client confirmed)' : request.state === 'approved' ? 'Approved; awaiting client' : request.state}))};
 }

@@ -3,6 +3,10 @@ import {authorityFingerprint} from './licence.mjs';
 export function validateAuthority(config, {allowTestHttp = false} = {}) {
   if (!config || config.schema !== 1 || typeof config.publicKey !== 'string') throw new Error('Activation authority is not configured.');
   authorityFingerprint(config.publicKey);
+  if(config.mode==='offline') {
+    if(config.url)throw new Error('Offline authority configuration must not include a server address.');
+    return {schema:1,mode:'offline',publicKey:config.publicKey};
+  }
   const url = new URL(config.url);
   if (url.username || url.password || url.search || url.hash || url.pathname !== '/') throw new Error('The activation authority must be a base URL without credentials or a path.');
   const test = allowTestHttp && url.protocol === 'http:' && url.hostname === '127.0.0.1';
@@ -16,6 +20,7 @@ export class OnlineActivation {
   constructor({gate, config, fetcher = fetch, allowTestHttp = false}) {
     this.gate = gate;
     this.config = validateAuthority(config, {allowTestHttp});
+    if(this.config.mode==='offline')throw new Error('Use file exchange for this offline authority.');
     this.fetcher = fetcher;
   }
   async send(endpoint, data) {

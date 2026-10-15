@@ -45,12 +45,15 @@ async function refresh() {
   if (!$('toolChoices').querySelector('input')) for (const tool of tools) {
     const label=document.createElement('label'), input=document.createElement('input');input.type='checkbox';input.value=tool.id;input.checked=true;label.append(input,document.createTextNode(tool.name));$('toolChoices').append(label);
   }
-  $('keyCount').textContent=data.keys.length; $('pendingCount').textContent=data.requests.filter(r=>r.state==='pending').length; $('activeCount').textContent=data.requests.filter(r=>r.confirmedAt).length;
+  $('keyCount').textContent=data.keys.length; $('pendingCount').textContent=data.summary.pending; $('activeCount').textContent=data.summary.confirmed;
+  $('installationSummary').textContent=`${data.summary.clients} client names | ${data.summary.installations} registered installations | ${data.summary.approved} approved | ${data.summary.expired} expired. Unreported copies and live offline usage cannot be counted.`;
   $('requests').replaceChildren();
   for (const request of [...data.requests].reverse()) {
     const row=document.createElement('tr');const who=cell(row,request.customer);const id=document.createElement('small');id.textContent=request.installationId;who.append(id);
     cell(row,names(request.tools));cell(row,request.status);timestamp(row,request.receivedAt);timestamp(row,request.approvedAt);timestamp(row,request.confirmedAt);
     const actions=cell(row,'');
+    const mode=document.createElement('small');mode.textContent=(request.activationMode||'online')+' activation; '+(request.registration?.appVersion||'version not reported')+'; last reported: '+(request.lastReportedAt||'not confirmed');who.append(mode);
+    if(request.state==='approved'){const button=document.createElement('button');button.textContent='Download approval';button.onclick=()=>run(async()=>saveOffline(await api('/api/offline/receipt',{installationId:request.installationId}),'printsmen-approval-'+request.installationId+'.json'));actions.append(button);}
     if(request.state==='pending') for(const decision of ['approve','reject']) {const button=document.createElement('button');button.textContent=decision==='approve'?'Approve':'Reject';button.onclick=()=>run(async()=>{if(!confirm((decision==='approve'?'Approve and permanently bind this key to':'Reject')+' installation '+request.installationId+'?'))return;await api('/api/decision',{installationId:request.installationId,decision});await refresh();});actions.append(button);}
     $('requests').append(row);
   }
@@ -73,4 +76,8 @@ $('copyKey').onclick=()=>run(async()=>{try{await navigator.clipboard.writeText($
 $('refresh').onclick=()=>run(refresh);
 $('logout').onclick=()=>run(async()=>{await api('/api/logout',{});signedOut();clearRecoveryCodes();});
 setInterval(()=>{if(signedIn&&!busy)refresh().catch(error=>$('message').textContent=error.message);},30000);
+function saveOffline(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+const offlinePanel=document.createElement('section');offlinePanel.className='panel';const offlineTitle=document.createElement('h2');offlineTitle.textContent='Offline clients and installation register';const summary=document.createElement('p');summary.id='installationSummary';offlinePanel.append(offlineTitle,summary);
+for(const [action,label] of [['request','Import client activation request'],['confirmation','Import client confirmation']]){const wrap=document.createElement('label');wrap.textContent=label;const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=()=>run(async()=>{try{const file=input.files[0];if(!file||file.size>16384)throw new Error('Choose an activation JSON file under 16 KB.');await api('/api/offline/'+action,JSON.parse(await file.text()));await refresh();}finally{input.value='';}});wrap.append(input);offlinePanel.append(wrap);}
+$('dashboard').prepend(offlinePanel);
 refresh().catch(error=>{$('message').textContent=error.message==='Owner sign-in is required.'?'Sign in to manage licences.':error.message;});

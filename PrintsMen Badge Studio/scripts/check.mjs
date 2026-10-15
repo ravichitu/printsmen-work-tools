@@ -8,6 +8,8 @@ import {updateConfig} from '../updates/release.mjs';
 import {createOperatorAuth} from '../licensing/operator-auth.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const supabaseConfig=JSON.parse(await readFile(path.join(root,'supabase/config.json'),'utf8'));
+if(supabaseConfig.schema!==1||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(supabaseConfig.url)||!/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(supabaseConfig.publishableKey))throw new Error('Invalid Supabase public project configuration.');
 const excluded = new Set(['vendor', 'printsmen-vendor', 'node_modules', 'output', 'test-output', 'dist', 'Backups']);
 const failures = [];
 const syntaxJobs = [];
