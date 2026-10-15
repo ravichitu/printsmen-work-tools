@@ -60,6 +60,14 @@ verification key. It requires Node.js and is not a signed EXE/MSI. The destinati
 must be new. The development server entry, owner utility, private keys, authority
 records, tests and customer artwork are excluded.
 
+For a managed package that can be activated without client internet, build with
+`node build-managed.mjs offline C:\ABSOLUTE\NEW-OUTPUT-FOLDER`. The command prompts
+for one local operator username and twice for a hidden password, then writes only
+its salted password hash into that package. This login opens the app but does not
+activate it; the signed offline approval exchange is still required. Each offline
+package has one local operator account. Supabase multi-user authentication requires
+internet at sign-in.
+
 ## Production limits
 
 The catalogue includes Customised Studio and 20 PrintsMen tools. Workspace access is

@@ -44,9 +44,9 @@ export function createStudioServer({root, gate = null, activation = null, config
         sameOrigin(req,origin);
         if(!operatorAuth?.status(req).loggedIn)return json(res,401,{error:'Sign in before registering this installation.'});
         if(req.headers['x-studio-csrf']!==csrf)return json(res,403,{error:'Reload the dashboard and try again.'});
-        const body=await readJson(req),identity=operatorAuth.identity(req),licence=await status();
+        const body=await readJson(req),identity=operatorAuth.identity?.(req),licence=await status();
         if(body.consent!==true)return json(res,400,{error:'Confirm the installation reporting notice first.'});
-        if(!supabaseConfig||!identity||!gate||!licence.active||licence.mode!=='managed')return json(res,409,{error:'Only an activated managed installation can be registered.'});
+        if(!supabaseConfig||!identity||!gate||!licence.active||licence.mode!=='managed')return json(res,409,{error:'Cloud reporting requires a managed online installation and Supabase sign-in. Offline installations can be reported later by the owner.'});
         const installation=await gate.request(),base=supabaseConfig.url+'/rest/v1/rpc/printsmen_report_installation';
         const headers={'apikey':supabaseConfig.publishableKey,'Authorization':'Bearer '+identity.accessToken,'Content-Type':'application/json'};
         let response,result;

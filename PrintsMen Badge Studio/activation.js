@@ -15,7 +15,7 @@ async function refresh() {
   $('validity').textContent = licence.state === 'active' ? (licence.expiresAt?'Expires '+new Date(licence.expiresAt).toLocaleString():'Lifetime of this installation; no expiry') : ['development','preview'].includes(licence.mode) ? 'No production licence applied' : 'Approval required';
   $('tools').textContent = licence.state === 'active' ? data.tools.filter(tool => licence.tools.includes(tool.id)).map(tool => tool.name).join(', ') : ['development','preview'].includes(licence.mode) ? 'All tools available for local testing' : 'Locked until approved';
   $('open').hidden = !licence.active;
-  $('cloudRegistration').hidden = !(licence.mode==='managed'&&licence.active&&data.authentication?.loggedIn);
+  $('cloudRegistration').hidden = !(licence.mode==='managed'&&licence.active&&data.authentication?.provider==='supabase'&&data.authentication?.loggedIn);
   $('activate').disabled = busy || !data.onlineActivation || licence.state === 'invalid';
   if (licence.customer && !$('shop').value) $('shop').value = licence.customer;
   if (!data.onlineActivation) $('result').textContent = licence.mode==='managed'?'Use Offline activation below to exchange files with your owner.':'This preview is not a managed installation. Offline licensing requires an owner-issued managed package.';

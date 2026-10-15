@@ -18,9 +18,11 @@ An offline licence is still a real owner-issued, signed licence. It is not a no-
 4. For online activation, approve the incoming request in **Activation requests**.
 5. For offline activation, import the client's activation request JSON, approve it, then use **Download approval** to return the approval JSON to that client.
 
+For an offline managed package, run `node build-managed.mjs offline C:\ABSOLUTE\NEW-OUTPUT-FOLDER` from the owner Licence Manager folder. The builder asks for a client-package operator username and a password twice without echoing it. Give those local login credentials privately with the package. The package stores only the salted password hash. Offline packages have one local operator login; multiple individually managed users need the connected Supabase account path.
+
 ## Client: activate online
 
-1. Install and start the managed application, then sign in with an active operator account.
+1. Install and start the managed application, then sign in with an active Supabase operator account for online packages or the owner-created local username/password for an offline package.
 2. Open **Activation dashboard**, enter the client/shop name and owner-issued key, then choose **Request / check activation online**.
 3. Wait for the owner to approve the request, then choose **Request / check activation online** again to accept the signed licence.
 4. The status page shows the tools, validity and activation times. The owner dashboard shows request, approval and confirmation times.

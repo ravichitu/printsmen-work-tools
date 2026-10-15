@@ -23,7 +23,7 @@ export function createOperatorAuth(config,{cookieName='pm_operator'}={}) {
     return {token,session};
   }
   return {
-    status(req){return {required:true,loggedIn:!!current(req).session,username:current(req).session?config.username:null,temporary:config.temporary===true};},
+    status(req){return {required:true,provider:config.localOnly?'local-offline':'local',loggedIn:!!current(req).session,username:current(req).session?config.username:null,temporary:config.temporary===true};},
     async login(req,res,input) {
       current(req);
       const ip=req.socket.remoteAddress;

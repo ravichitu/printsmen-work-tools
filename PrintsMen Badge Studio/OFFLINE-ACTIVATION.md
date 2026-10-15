@@ -4,6 +4,8 @@ Managed installations now support an owner-approved file exchange. Preview build
 remain previews and do not silently become licensed builds.
 
 1. In Activation, enter the client name, licence key and matching contact details.
+   Sign in with the local operator account created for that offline managed package;
+   this login does not itself grant licensed tool access.
 2. Accept the data notice and download the activation request. Transfer it privately
    to the owner: it includes the licence key, installation challenge and device hash.
 3. In the owner dashboard, import the request and approve the installation.

@@ -13,12 +13,17 @@ import {createSupabaseAuth} from './licensing/supabase-auth.mjs';
 const root = path.dirname(fileURLToPath(import.meta.url));
 let gate = null, activation = null, configurationError = '',operatorAuth=null,supabaseConfig=null;
 try {
-  supabaseConfig=JSON.parse(await readFile(path.join(root,'supabase/config.json'),'utf8'));
-  operatorAuth=createSupabaseAuth(supabaseConfig,{cookieName:'pm_supabase_'+rootId(root)});
   const config = validateAuthority(JSON.parse(await readFile(path.join(root, 'activation-authority.json'), 'utf8')));
   gate = new InstallationGate({root, publicKey:config.publicKey, machineHash:await windowsMachineHash(),
     store:new LicenceStore(defaultStateFile(), windowsProtection)});
-  if(config.mode!=='offline')activation = new OnlineActivation({gate, config});
+  if(config.mode==='offline'){
+    const localConfig=JSON.parse(await readFile(path.join(root,'operator-auth.json'),'utf8'));
+    operatorAuth=createOperatorAuth({...localConfig,localOnly:true},{cookieName:'pm_offline_'+rootId(root)});
+  }else{
+    supabaseConfig=JSON.parse(await readFile(path.join(root,'supabase/config.json'),'utf8'));
+    operatorAuth=createSupabaseAuth(supabaseConfig,{cookieName:'pm_supabase_'+rootId(root)});
+    activation = new OnlineActivation({gate, config});
+  }
 } catch (error) { configurationError = 'Managed activation configuration is unavailable. Contact the owner. ' + error.message; }
 const updates=await loadUpdateManager(root).catch(error=>{console.error('Updates disabled: '+error.message);return null;});
 const server = createStudioServer({root, gate, activation, configurationError,operatorAuth,supabaseConfig,updates});
