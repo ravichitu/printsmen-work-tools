@@ -52,7 +52,7 @@ export class OnlineActivation {
       const status = await this.gate.activate(reply.licence);
       if (!status.active) throw new Error(status.message);
       let confirmation = 'recorded';
-      try { await this.send('/v1/activation/confirm', {...request, licenceId:status.licenceId}); }
+      try { await this.send('/v1/activation/confirm', {...request, licenceId:status.licenceId, clientActivatedAt:status.appliedAt}); }
       catch { confirmation = 'pending'; }
       return {...status, confirmation, message:status.message + (confirmation === 'pending' ? ' Dashboard confirmation could not sync. Check activation again when connected.' : '')};
     } finally { this.busy = false; }

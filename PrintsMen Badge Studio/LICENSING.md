@@ -1,88 +1,62 @@
-# Local licensing prototype (0.6.0)
+# PrintsMen licensing and activation guide
 
-## Agreed behavior
+## Three operating modes
 
-- No Supabase. The owner-controlled activation authority is separate from operators.
-- The owner dashboard generates a unique key for a customer and selected tools.
-  Only its hash is retained; the full key is shown once.
-- Initial activation requires the configured HTTPS authority and explicit owner
-  approval. Internet connectivity alone is NOT approval. No offline file-import
-  activation endpoint is provided.
-- An Ed25519 signed receipt binds the installation ID, Windows identity hash,
-  request challenge, allowed tools, customer and approval timestamp.
-- The client verifies the receipt before saving it, then reports confirmation.
-  Dashboard timestamps distinguish received, approved and client-confirmed.
-- This is an installation-lifetime licence, not a periodically self-issued renewal.
-  Approved installations continue offline. No expiry is fabricated or extended.
-- A key is permanently bound on approval. Managed uninstall retires the installation.
-  Reinstall gets a fresh ID/challenge and requires a new key and owner approval.
+- **Local preview (no production licence):** runs the preview installer with its local operator login. It is for testing, is not protected by customer licensing, and does not register usage in Supabase. This is different from offline activation.
+- **Online activation:** a managed installation connects to the owner activation authority, which checks the key and installation and waits for owner approval. Internet is required for the approval exchange. After activation, the signed licence can be used offline on that installation.
+- **Offline file activation:** a managed installation can exchange request, approval and confirmation JSON files with the owner. The client app does not need internet during this exchange. Supabase sync is optional and can be done later from an internet-connected owner computer.
 
-## Separate dashboards
+An offline licence is still a real owner-issued, signed licence. It is not a no-licence mode, and it is not generated or approved by the client computer.
 
-The studio's activation.html shows its own installation status and allowed tools.
-It cannot generate keys or approve itself. The separate PrintsMen Licence Manager
-contains the owner dashboard. NEVER ship that folder or its private directory to
-operators. No production online authority has been configured or deployed.
+**Current deployment state:** online activation is not available until the owner activation authority is hosted on HTTPS and a managed installer is built for that URL. Supabase is currently the account and reporting database; it is not the key signer or activation authority. Until the hosted authority exists, use managed offline file activation. Supabase sign-in and sync also require applying all three SQL migrations and activating the Supabase owner profile.
 
-The source workspace deliberately remains an unlocked development copy. The owner
-build-managed.mjs creates an operator payload using managed-server.mjs as its ONLY
-server.mjs entry point. Missing/corrupt authority or installation data fails closed.
+## Owner: make and approve a licence
 
-## Managed Windows setup
+1. Start **PrintsMen Licence Manager** on the owner computer and sign in to its local owner dashboard.
+2. Enter the client/shop details, select the allowed tools and optional expiry, then choose **Generate unique key**.
+3. Save the client licence sheet and give the key only to that client. The recovery key is owner-only; keep it separately. The owner authority stores hashes, not the displayed secrets.
+4. For online activation, approve the incoming request in **Activation requests**.
+5. For offline activation, import the client's activation request JSON, approve it, then use **Download approval** to return the approval JSON to that client.
 
-The FIRST installer is explicitly a LOCAL PREVIEW, by user choice. It has a compiled
-NSIS setup/uninstaller, bundled Node.js and temporary operator login, but deliberately
-does NOT require a production licence. The owner utility is excluded. This preview
-is distinct from the managed activation package described below. Its uninstaller
-stops only its own running server and removes only installer-owned files.
-The preview uses localhost port 4188 by default, separate from the source tool on
-4178. Session cookies are installation-specific, so the two do not sign each other
-out. The temporary operator credentials are supplied separately by the owner.
+## Client: activate online
 
-First configure the owner authority, deploy it behind HTTPS, and build an installer
-for that authority URL. Setup.cmd requires Node.js 22+; it is NOT a compiled/signed
-EXE or MSI and does not bundle Node.js.
+1. Install and start the managed application, then sign in with an active operator account.
+2. Open **Activation dashboard**, enter the client/shop name and owner-issued key, then choose **Request / check activation online**.
+3. Wait for the owner to approve the request, then choose **Request / check activation online** again to accept the signed licence.
+4. The status page shows the tools, validity and activation times. The owner dashboard shows request, approval and confirmation times.
 
-Setup installs under %LOCALAPPDATA%\Programs\PrintsMen Badge Studio and registers an
-Apps & Features uninstall command in HKCU. The ledger is outside the app under
-%LOCALAPPDATA%\PrintsMen\BadgeStudioLicence, protected by Windows DPAPI for the current
-Windows account. The server must run as that account. Changing Windows/account
-requires recovery and approval. Uninstall retires the licence before removing only
-manifest-owned files; the retirement ledger, unrecognised files and browser storage
-are preserved. Export browser projects before uninstalling. No active job is saved.
+The activation page has an optional reporting-consent checkbox. If selected, the owner activation register may receive the installation ID, device hash, app version and platform. It never sends artwork or print files.
 
-Do not delete the folder manually. Setup refuses an existing target and refuses
-to replace a live installation identity. If uninstall is interrupted, keep the
-ledger and contact the owner. Installer hashes detect accidental corruption; the
-manifest is NOT cryptographically signed yet. An update installer is not included.
+## Client: activate offline
 
-## Security limits
+1. On **Activation dashboard**, enter the client/shop name and key. For the owner register to include the device record, optionally accept the data notice.
+2. Choose **Download activation request** and send `printsmen-activation-request.json` privately to the owner. This request contains the licence key; protect it like a credential.
+3. The owner imports the request in the Licence Manager, approves it, and returns the downloaded approval JSON.
+4. Import that file using **Import owner approval**. The application validates and saves the signed licence locally.
+5. Choose **Download activation confirmation** and return the confirmation JSON to the owner. This lets the owner dashboard record that the client reported successful activation.
 
-- Servers remain loopback-only. No firewall/network settings were changed. A single
-  temporary operator account now has server-side sign-in, password hashing, session
-  cookies and logout. Ten separate accounts, LAN access and seat enforcement remain.
-- Badge vs PrintsMen workspace access is server-gated. Individual PrintsMen tools
-  share one HTML/JavaScript application; their selected-tool restrictions currently
-  apply to the interface only. Altering client code can bypass them. Strong per-tool
-  licensing needs isolated export/processing logic behind server permissions.
-- Source files, old ZIPs and development copies are not retroactively protected.
-  Administrators can patch code or restore whole Windows/state snapshots. This is
-  NOT tamper-proof DRM and is not ready to sell as production copy protection.
-- Already loaded browser editors/exports do not instantly stop after uninstall.
-  New HTTP requests/reloads are gated. Backend export enforcement is still pending.
-- Offline installs cannot be immediately revoked. Confirmation is client-reported,
-  not hardware attestation or proof of continuing live usage.
-- Authority timestamps use UTC and need a synchronised server clock. The dashboard
-  also shows the viewing browser's local timezone.
-- Owner state uses an exclusive lock and atomic replacement, intended for ONE
-  authority process. Production needs a transactional database, recovery/rotation,
-  verified backups, admin security review, monitoring and rate-limit tuning.
-- Signed updates, public HTTPS hosting, hardened per-tool enforcement and full
-  live-browser verification are unfinished. No production licence was applied.
+Keep the activation request, approval and confirmation files private. They contain installation or licence metadata. Offline requests and confirmations appear in the owner dashboard only after the owner imports their files.
 
-## Verification
+## Supabase sign-in, register sync and device reporting
 
-Run node --test tests/*.test.mjs. Tests use temporary identities and signing keys;
-they do not activate the real tool, install into Programs, change registry settings,
-or contact a production authority. Owner integration tests require the sibling
-PrintsMen Licence Manager source folder and skip if it is not distributed.
+1. Apply the three SQL migrations in order and activate the first owner account as described in [SUPABASE-SETUP.md](SUPABASE-SETUP.md).
+2. In the owner Licence Manager, sign in locally, then connect using an active Supabase `owner` or `admin` account.
+3. Choose **Sync keys and consented devices** when ready. This sends client contact fields, selected tools, status/expiry and one-way licence-key hashes. Plaintext licence keys, recovery keys, passwords and the signing key are not uploaded.
+4. For offline clients, sync after importing their consented request/confirmation files. Only requests with accepted reporting consent are included.
+5. A managed app user can separately opt in on **Activation dashboard** under **Installation reporting**. This sends the installation ID, device hash, app version, platform, activation mode and timestamps. It does not grant a licence.
+
+Supabase sync requires internet. A client used offline can continue to work under its signed licence; its usage cannot be shown in the cloud register until a consented report is imported or sent later.
+
+## Understanding the timestamps
+
+- **Applied on this device** is captured when the local app successfully verifies and saves the signed licence. It uses the device clock and is shown in the device's local timezone; it is useful operational data, not tamper-proof evidence.
+- **Licence issued (authority UTC)** is inside the signed licence and comes from the owner authority's clock.
+- **Received, approved and owner confirmation** are recorded by the owner authority. Offline confirmation time means when the owner imports the confirmation file; it is separate from the device-reported apply time.
+- Older installations activated before this timestamp field was added may show that their local apply time was not recorded. Rechecking activation can record it where the authority still permits the existing approval.
+
+## Security and availability limits
+
+- The owner keeps the Ed25519 signing authority locally. Supabase receives only register data through authenticated requests and RLS; never put a service-role key or database password in the app.
+- Device reporting is voluntary and self-reported, not hardware attestation. Offline or unreported installations cannot be counted live, and an already activated offline licence cannot be immediately revoked remotely.
+- Reinstallation requires a replacement key and owner approval. A recovery key is one-use and owner-controlled.
+- The local preview is not a commercial licensing release. Code patching, administrator access and restored system snapshots can bypass local enforcement. Do not represent this prototype as tamper-proof DRM.

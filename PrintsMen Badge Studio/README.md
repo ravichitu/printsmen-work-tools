@@ -49,10 +49,12 @@ the local server. The server listens only on 127.0.0.1, not the public network.
   temporary operator sign-in, desktop/Start Menu shortcuts and an uninstaller.
   It deliberately enables all tools without production licensing, as requested.
   It remains loopback-only; do not expose the temporary account to the internet.
-- Version 0.6.0: local licensing prototype and activation status page. A separate
-  owner dashboard creates tool-specific keys and approves installations. Production
-  activation is deliberately disabled until HTTPS hosting is chosen. This source
-  workspace remains unlocked. Read `LICENSING.md` for setup, tests and limitations.
+- Licensing: the owner utility generates tool-specific keys, approves online or
+  offline file requests, and records issuance/approval/confirmation times. Supabase
+  auth and consent-based register sync require the listed SQL migrations. Online
+  activation remains unavailable until the owner authority is hosted behind HTTPS.
+  The separate preview installer is still a no-production-licence testing build.
+  Read `LICENSING.md` for the operator workflow and limitations.
 - Version 0.5.0: shared violet/gold home page. Choose Badge Designer (`badge.html`)
   or the main PrintsMen collection (`printsmen/index.html`). Both keep their own
   editing logic; artwork is not automatically transferred between workspaces.

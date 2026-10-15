@@ -50,7 +50,7 @@ export function createStudioServer({root, gate = null, activation = null, config
         const installation=await gate.request(),base=supabaseConfig.url+'/rest/v1/rpc/printsmen_report_installation';
         const headers={'apikey':supabaseConfig.publishableKey,'Authorization':'Bearer '+identity.accessToken,'Content-Type':'application/json'};
         let response,result;
-        try{response=await fetch(base,{method:'POST',headers,body:JSON.stringify({p_install_id:installation.installationId,p_device_hash:installation.machineHash,p_app_version:updates?.version||'unknown',p_platform:process.platform,p_activation_mode:'online'}),signal:AbortSignal.timeout(12000),redirect:'error'});result=await response.json();}
+        try{response=await fetch(base,{method:'POST',headers,body:JSON.stringify({p_install_id:installation.installationId,p_device_hash:installation.machineHash,p_app_version:updates?.version||'unknown',p_platform:process.platform,p_activation_mode:activation?'online':'offline',p_client_activated_at:licence.appliedAt}),signal:AbortSignal.timeout(12000),redirect:'error'});result=await response.json();}
         catch(error){if(error.name==='TimeoutError')return json(res,503,{error:'Supabase request timed out. Try again when connected.'});return json(res,503,{error:'Could not reach Supabase. Check the internet connection.'});}
         if(!response.ok)return json(res,503,{error:typeof result==='string'?result:'Could not register the installation in Supabase. Apply both licensing migrations and confirm this account is active.'});
         return json(res,200,{ok:true,reportedAt:result});
@@ -95,7 +95,7 @@ export function createStudioServer({root, gate = null, activation = null, config
         if(url.pathname.endsWith('/confirmation')) {
           const current=await gate.status();
           if(!current.active)return json(res,409,{error:'Activate this installation first.'});
-          return json(res,200,{...await gate.request(),licenceId:current.licenceId});
+          return json(res,200,{...await gate.request(),licenceId:current.licenceId,clientActivatedAt:current.appliedAt});
         }
         return json(res,404,{error:'Unknown offline action.'});
       }

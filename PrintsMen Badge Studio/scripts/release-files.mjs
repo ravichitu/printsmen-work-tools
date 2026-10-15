@@ -8,7 +8,7 @@ const files = ['assistant.js','assistant.css','automation-core.js','naming.js','
   'studio-server.mjs','activation.html','activation.css','activation.js','Uninstall Badge Studio.cmd','login.html','login.js','session.js',
   'licensing/licence.mjs','licensing/client.mjs','licensing/catalog.mjs','licensing/windows.mjs','licensing/store.mjs','licensing/installation.mjs',
   'licensing/online.mjs','licensing/http.mjs','licensing/operator-auth.mjs','licensing/supabase-auth.mjs','setup/managed-install.mjs','setup/apply-preview-update.mjs','supabase/config.json','SUPABASE-SETUP.md',
-  'supabase/migrations/202610150001_printsmen_accounts_licensing.sql','supabase/migrations/202610160001_cloud_licence_and_device_sync.sql',
+  'supabase/migrations/202610150001_printsmen_accounts_licensing.sql','supabase/migrations/202610160001_cloud_licence_and_device_sync.sql','supabase/migrations/202610160002_activation_applied_timestamp.sql',
   'updates.html','updates.js','updates.css','updates-client.js','updates-config.json','updates/manager.mjs','updates/release.mjs','Start Update Manager.cmd','UPDATES.md',
   'printsmen/index.html','printsmen/printsmen-ui.js','printsmen/printsmen-ui.css','printsmen/printsmen-pdf.js','production-runtime.mjs'];
 export async function runtimeFiles(root) {

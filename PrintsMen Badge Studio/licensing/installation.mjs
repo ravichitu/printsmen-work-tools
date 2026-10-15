@@ -45,7 +45,7 @@ export class InstallationGate {
       if (!installation.licence) return {mode:'managed', state:'pending', active:false, installationId:installation.installationId, message:'Owner approval is required for this installation.'};
       const licence = verifyLicence(installation.licence, this.publicKey, installation);
       return {mode:'managed', state:'active', active:true, installationId:installation.installationId,
-        customer:licence.customer, licenceId:licence.licenceId, activatedAt:licence.issuedAt, expiresAt:licence.expiresAt||null, term:licence.term, tools:licence.tools,
+        customer:licence.customer, licenceId:licence.licenceId, activatedAt:licence.issuedAt, issuedAt:licence.issuedAt, appliedAt:installation.activatedAt||null, expiresAt:licence.expiresAt||null, term:licence.term, tools:licence.tools,
         message:'Active for this installation. Owner approval has been verified; periodic renewal is not required.'};
     } catch (error) {
       return {mode:'managed', state:'invalid', active:false, message:error.code === 'ENOENT' ? 'Installation data is missing. Use managed setup; do not copy application folders.' : error.message};
@@ -57,6 +57,7 @@ export class InstallationGate {
       const installation = await this.identity(ledger);
       verifyLicence(envelope, this.publicKey, installation);
       installation.licence = envelope;
+      installation.activatedAt ||= new Date().toISOString();
     });
     return this.status();
   }

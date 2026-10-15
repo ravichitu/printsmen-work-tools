@@ -100,7 +100,7 @@ export function createAuthorityServer({store, publicOrigin = null, testMode = fa
         const installations=state.requests.filter(request=>request.registration?.consent===true&&/^[0-9a-f]{64}$/.test(request.machineHash||'')).map(request=>({
           installationId:request.installationId,keyId:request.keyId,deviceHash:request.machineHash,appVersion:request.registration.appVersion,platform:request.registration.platform,
           activationMode:request.activationMode||'online',state:request.state==='rejected'?'revoked':request.confirmedAt?'active':request.state==='approved'?'approved':'pending',
-          receivedAt:request.receivedAt,approvedAt:request.approvedAt||null,lastReportedAt:request.lastReportedAt||null,noticeAcceptedAt:request.registration.noticeAcceptedAt
+          receivedAt:request.receivedAt,approvedAt:request.approvedAt||null,lastReportedAt:request.lastReportedAt||null,clientActivatedAt:request.clientActivatedAt||null,noticeAcceptedAt:request.registration.noticeAcceptedAt
         }));
         return json(res,200,{keys,installations});
       }

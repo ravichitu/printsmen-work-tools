@@ -101,6 +101,7 @@ export function confirmActivation(state, input) {
   const payload = JSON.parse(Buffer.from(request.licence.payload, 'base64url').toString('utf8'));
   if (payload.licenceId !== input.licenceId) reject('Activation receipt does not match.', 403);
   request.confirmedAt ||= new Date().toISOString();
+  if(typeof input.clientActivatedAt==='string'&&Number.isFinite(Date.parse(input.clientActivatedAt)))request.clientActivatedAt=input.clientActivatedAt;
   request.lastReportedAt = new Date().toISOString();
   return {state:'confirmed', confirmedAt:request.confirmedAt};
 }

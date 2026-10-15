@@ -1,7 +1,9 @@
 # PrintsMen licence owner dashboard
 
 OWNER ONLY: keep this utility separate from operator/customer packages.
-No Supabase or other hosted service is configured.
+The signing authority and key generation stay on this owner computer. Supabase
+account/reporting integration is available after its SQL migrations are applied;
+the online activation authority is still not hosted.
 
 Client details, printable licence sheets and one-use owner-controlled reinstall
 recovery are now available. Read [CLIENT-RECOVERY.md](CLIENT-RECOVERY.md) before
@@ -18,9 +20,10 @@ issuing keys. Recovery keys belong only on the separate owner sheet.
 5. Review the installation request before approving. Received, approved and
    client-confirmed timestamps are displayed in local time and authority UTC.
 
-This is a local test environment. Shipping operator packages require an HTTPS
-authority; no production HTTP/localhost bypass is included. Tests use an injected
-loopback transport and ephemeral keys. Normal installs cannot activate until hosted.
+This dashboard is local-only. Use managed offline activation for clients without
+internet. Shipping online-activation packages require an HTTPS authority; no
+production HTTP/localhost bypass is included. Tests use an injected loopback
+transport and ephemeral keys. Online approval cannot activate until hosted.
 
 Keys are shown once and stored only as hashes. Approval binds a key permanently;
 reinstall requires a fresh key and approval. Reject is available before approval.
@@ -46,7 +49,7 @@ durable storage and security review. DPAPI currently targets Windows; Linux host
 needs a server-side secret-storage adapter. Do not expose this prototype as a
 finished service or use a temporary tunnel to bypass production setup.
 
-After HTTPS hosting and security checks, build the operator installer:
+After HTTPS hosting and security checks, build the online operator payload:
 
 ```text
 node build-managed.mjs https://YOUR-ACTIVATION-DOMAIN C:\ABSOLUTE\NEW-OUTPUT-FOLDER
